@@ -1,0 +1,250 @@
+{
+  "last_node_id": 9,
+  "last_link_id": 12,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "DownloadAndLoadLivePortraitModels",
+      "pos": [30, 30],
+      "size": {"0": 302, "1": 82},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "live_portrait_pipe",
+          "type": "LIVEPORTRAITPIPE",
+          "links": [1, 5],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {"Node name for S&R": "DownloadAndLoadLivePortraitModels"},
+      "widgets_values": ["auto", "human"]
+    },
+    {
+      "id": 2,
+      "type": "LivePortraitLoadFaceAlignmentCropper",
+      "pos": [30, 160],
+      "size": {"0": 319, "1": 154},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "cropper",
+          "type": "LPCROPPER",
+          "links": [2],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {"Node name for S&R": "LivePortraitLoadFaceAlignmentCropper"},
+      "widgets_values": ["blazeface_back_camera", "torch_gpu", "cuda", "fp16", true]
+    },
+    {
+      "id": 3,
+      "type": "LoadImage",
+      "pos": [30, 290],
+      "size": {"0": 315, "1": 314},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [3, 6, 8],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "title": "Source Image (your character)",
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["", "image"]
+    },
+    {
+      "id": 4,
+      "type": "LoadImage",
+      "pos": [30, 660],
+      "size": {"0": 315, "1": 314},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [7],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "title": "Driving Image (reference pose)",
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["", "image"]
+    },
+    {
+      "id": 5,
+      "type": "LivePortraitCropper",
+      "pos": [400, 150],
+      "size": {"0": 330, "1": 242},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "pipeline", "type": "LIVEPORTRAITPIPE", "link": 1, "slot_index": 0},
+        {"name": "cropper",  "type": "LPCROPPER",        "link": 2, "slot_index": 1},
+        {"name": "source_image", "type": "IMAGE",        "link": 3}
+      ],
+      "outputs": [
+        {
+          "name": "cropped_image",
+          "type": "IMAGE",
+          "links": null,
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "crop_info",
+          "type": "CROPINFO",
+          "links": [4],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {"Node name for S&R": "LivePortraitCropper"},
+      "widgets_values": [512, 2.3, 0, -0.125, 0, "large-small", true]
+    },
+    {
+      "id": 6,
+      "type": "LivePortraitProcess",
+      "pos": [790, 30],
+      "size": {"0": 430, "1": 330},
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "pipeline",             "type": "LIVEPORTRAITPIPE",  "link": 5},
+        {"name": "crop_info",            "type": "CROPINFO",          "link": 4},
+        {"name": "source_image",         "type": "IMAGE",             "link": 6},
+        {"name": "driving_images",       "type": "IMAGE",             "link": 7},
+        {"name": "opt_retargeting_info", "type": "RETARGETINGINFO",   "link": null}
+      ],
+      "outputs": [
+        {
+          "name": "cropped_image",
+          "type": "IMAGE",
+          "links": [9],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "output",
+          "type": "LP_OUT",
+          "links": [10],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {"Node name for S&R": "LivePortraitProcess"},
+      "widgets_values": [false, 0.03, true, 1, "constant", "relative", 0.000003, true, 1]
+    },
+    {
+      "id": 7,
+      "type": "SolidMask",
+      "pos": [790, 420],
+      "size": {"0": 315, "1": 106},
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [11],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "Blend Mask (full face region)",
+      "properties": {"Node name for S&R": "SolidMask"},
+      "widgets_values": [1.0, 512, 512]
+    },
+    {
+      "id": 8,
+      "type": "LivePortraitComposite",
+      "pos": [1280, 150],
+      "size": {"0": 355, "1": 86},
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "source_image",      "type": "IMAGE",  "link": 8},
+        {"name": "cropped_image",     "type": "IMAGE",  "link": 9},
+        {"name": "liveportrait_out",  "type": "LP_OUT", "link": 10},
+        {"name": "mask",              "type": "MASK",   "link": 11}
+      ],
+      "outputs": [
+        {
+          "name": "full_images",
+          "type": "IMAGE",
+          "links": [12],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {"Node name for S&R": "LivePortraitComposite"}
+    },
+    {
+      "id": 9,
+      "type": "SaveImage",
+      "pos": [1690, 150],
+      "size": {"0": 315, "1": 270},
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 12}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["LivePortrait_pose"]
+    }
+  ],
+  "links": [
+    [1,  1, 0, 5, 0, "LIVEPORTRAITPIPE"],
+    [2,  2, 0, 5, 1, "LPCROPPER"],
+    [3,  3, 0, 5, 2, "IMAGE"],
+    [4,  5, 1, 6, 1, "CROPINFO"],
+    [5,  1, 0, 6, 0, "LIVEPORTRAITPIPE"],
+    [6,  3, 0, 6, 2, "IMAGE"],
+    [7,  4, 0, 6, 3, "IMAGE"],
+    [8,  3, 0, 8, 0, "IMAGE"],
+    [9,  6, 0, 8, 1, "IMAGE"],
+    [10, 6, 1, 8, 2, "LP_OUT"],
+    [11, 7, 0, 8, 3, "MASK"],
+    [12, 8, 0, 9, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

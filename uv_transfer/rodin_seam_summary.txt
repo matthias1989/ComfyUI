@@ -1,0 +1,35 @@
+=== RODIN SEAM STRUCTURE ANALYSIS ===
+Total seam edges:    7462
+Total seam verts:    6955
+Connected components: 77
+  - 1 giant junction network: 5992 verts, 609 junctions
+  - 59 pure closed loops (all tiny, < 2cm span)
+  - 17 smaller open chains
+
+KEY FINDING:
+Rodin seams form a DENSE JUNCTION NETWORK, not clean anatomical rings.
+The 59 pure loops are tiny micro-loops (< 2cm) around small features
+(hair strands, fingers, eye sockets) — NOT neck/arm/leg border rings.
+The largest pure loop is 39 verts with x_span=0.019m (less than 2cm).
+A real neck ring on a human-scale model would be ~30cm diameter.
+
+=== BODY-BAND SEAM EDGE COUNTS ===
+  head         (0.85-1.01):  826 seam edges
+  neck_shldr   (0.70-0.85): 2112 seam edges   <- very dense
+  torso        (0.45-0.70):  286 seam edges
+  hip_leg      (0.30-0.45):  182 seam edges
+  mid_leg      (0.15-0.30):  175 seam edges
+  ankle        (0.00-0.15):  560 seam edges
+
+=== WHAT THIS MEANS ===
+Rodin's UV seaming is the result of an automated UV unwrap of a complex
+character (hair, clothing detail, skin texture regions). The seams are
+placed wherever the UV needs to split — not following anatomical seam
+lines a rigger/modeler would draw manually.
+
+=== SOLUTION ===
+Generate ANATOMICAL seams on Trellis directly:
+  1. Segment mesh into body parts (head/torso/L-arm/R-arm/L-leg/R-leg)
+  2. Mark seam edges at body-part boundaries -> gives clean rings
+  3. Run UV unwrap -> produces proper UV islands per body part
+This approach is topology-independent and works on any isotropic remesh.
