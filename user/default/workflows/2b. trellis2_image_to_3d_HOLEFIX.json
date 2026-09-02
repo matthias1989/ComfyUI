@@ -380,12 +380,12 @@
         12,
         49152,
         4,
-        64,
+        32,
         true,
         true,
-        "heun",
+        "euler",
         true,
-        8,
+        1,
         "flood_fill",
         true
       ]
@@ -2197,7 +2197,7 @@
         "Node name for S&R": "Trellis2FillHolesWithCuMesh"
       },
       "widgets_values": [
-        1.0
+        0.03
       ]
     },
     {
