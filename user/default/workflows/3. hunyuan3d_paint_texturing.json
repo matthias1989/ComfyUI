@@ -1,0 +1,133 @@
+{
+  "id": "hunyuan3d-paint-texturing",
+  "revision": 0,
+  "last_node_id": 7,
+  "last_link_id": 6,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [60, 100],
+      "size": [270, 310],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1]},
+        {"name": "MASK",  "type": "MASK",  "links": []}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["example.png", "image"]
+    },
+    {
+      "id": 2,
+      "type": "[Comfy3D] Load 3D Mesh",
+      "pos": [60, 480],
+      "size": [320, 210],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "mesh", "type": "MESH", "links": [2]}
+      ],
+      "properties": {"Node name for S&R": "[Comfy3D] Load 3D Mesh"},
+      "widgets_values": ["", false, true, false, false, false, 0.5]
+    },
+    {
+      "id": 3,
+      "type": "[Comfy3D] Multi Background Remover",
+      "pos": [400, 100],
+      "size": [270, 100],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "image_front", "type": "IMAGE", "link": 1},
+        {"name": "image_back",  "type": "IMAGE", "link": null, "shape": 7},
+        {"name": "image_left",  "type": "IMAGE", "link": null, "shape": 7}
+      ],
+      "outputs": [
+        {"name": "images", "type": "LIST", "links": [3]}
+      ],
+      "properties": {"Node name for S&R": "[Comfy3D] Multi Background Remover"}
+    },
+    {
+      "id": 4,
+      "type": "[Comfy3D] Load Hunyuan3D V2 TexGen Pipeline",
+      "pos": [400, 280],
+      "size": [320, 58],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "texgen_pipe", "type": "DIFFUSERS_PIPE", "links": [4]}
+      ],
+      "properties": {"Node name for S&R": "[Comfy3D] Load Hunyuan3D V2 TexGen Pipeline"},
+      "widgets_values": ["Turbo"]
+    },
+    {
+      "id": 5,
+      "type": "[Comfy3D] Hunyuan3D V2 Paint Model Turbo MV",
+      "pos": [790, 200],
+      "size": [320, 100],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "hunyuan3d_v2_texgen_pipe", "type": "DIFFUSERS_PIPE", "link": 4},
+        {"name": "mesh",                     "type": "MESH",           "link": 2},
+        {"name": "images",                   "type": "LIST",           "link": 3}
+      ],
+      "outputs": [
+        {"name": "mesh", "type": "MESH", "links": [5]}
+      ],
+      "properties": {"Node name for S&R": "[Comfy3D] Hunyuan3D V2 Paint Model Turbo MV"}
+    },
+    {
+      "id": 6,
+      "type": "[Comfy3D] Save 3D Mesh",
+      "pos": [1180, 100],
+      "size": [320, 70],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "mesh", "type": "MESH", "link": 5}
+      ],
+      "outputs": [
+        {"name": "save_path", "type": "STRING", "links": [6]}
+      ],
+      "properties": {"Node name for S&R": "[Comfy3D] Save 3D Mesh"},
+      "widgets_values": ["textured_char_%Y-%m-%d-%M-%S-%f.glb"]
+    },
+    {
+      "id": 7,
+      "type": "[Comfy3D] Preview 3DMesh",
+      "pos": [1180, 250],
+      "size": [320, 400],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "mesh_file_path", "type": "STRING", "link": 6}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "[Comfy3D] Preview 3DMesh"}
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 0, "IMAGE"],
+    [2, 2, 0, 5, 1, "MESH"],
+    [3, 3, 0, 5, 2, "LIST"],
+    [4, 4, 0, 5, 0, "DIFFUSERS_PIPE"],
+    [5, 5, 0, 6, 0, "MESH"],
+    [6, 6, 0, 7, 0, "STRING"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {"ds": {"scale": 1.0, "offset": [0, 0]}},
+  "version": 0.4
+}

@@ -1,0 +1,60 @@
+"""ComfyUI node: replace a generated character's webbed hands with clean donor hands BEFORE the remesh.
+Skeleton-free (geometric wrist-finding). Drops the donor hands overlapping the wrist stumps; the downstream
+Trellis2Remesh dual-contouring fuses them into one watertight mesh, after which UV/texture/rig treat the
+hands as native body. Operates on the MeshWithVoxel's vertex/face arrays only (duck-typed, no Trellis import)."""
+import os
+import numpy as np
+from . import hand_replace as hr
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+_DONOR_R = os.path.join(HERE, "assets", "donor_geo_R.npz")
+_DONOR_L = os.path.join(HERE, "assets", "donor_geo_L.npz")
+
+
+class ReplaceHandsWithDonor:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {"trimesh": ("TRIMESH",)},
+            "optional": {
+                "seam": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.1}),
+                "body_faces": ("INT", {"default": 135000, "min": 10000, "max": 5000000, "step": 5000}),
+            },
+        }
+
+    RETURN_TYPES = ("TRIMESH",)
+    RETURN_NAMES = ("trimesh",)
+    FUNCTION = "process"
+    CATEGORY = "HandGraft"
+
+    def process(self, trimesh, seam=0.5, body_faces=135000):
+        # Runs AFTER ToTrimesh, BEFORE SmartUV. Decimates the BODY to `body_faces` (cumesh), then grafts the
+        # FULL-RES donor hands on top -> the donor fingers are never decimated. The result is below SmartUV's
+        # target_faces, so SmartUV does only seams/UV (no re-decimation) and textures the hands + writes the obj.
+        import gc, trimesh as TM, numpy as _np
+        Vt = _np.asarray(trimesh.vertices, _np.float64); Ft = _np.asarray(trimesh.faces, _np.int64)
+        DBG = os.path.normpath(os.path.join(HERE, "..", "..", "output"))
+        try:
+            _np.savez(os.path.join(DBG, "handgraft_in.npz"), V=Vt.astype(_np.float32), F=Ft.astype(_np.int64))
+        except Exception as e:
+            print("[ReplaceHandsWithDonor] dump-in failed:", e, flush=True)
+        nf0 = len(Ft)
+        if body_faces and nf0 > body_faces:
+            import torch, cumesh as CuMesh
+            v = torch.tensor(Vt, dtype=torch.float32, device='cuda'); f = torch.tensor(Ft, dtype=torch.int32, device='cuda')
+            cm = CuMesh.CuMesh(); cm.init(v, f); cm.simplify(int(body_faces), verbose=False)
+            vv, ff = cm.read(); del cm; gc.collect()
+            Vt = vv.detach().cpu().numpy().astype(_np.float64); Ft = ff.detach().cpu().numpy().astype(_np.int64)
+        V2, F2, info = hr.replace_hands(Vt, Ft, np.load(_DONOR_R), np.load(_DONOR_L), seam=seam)
+        print(f"==== [ReplaceHandsWithDonor] RAN ====  body {nf0}->{len(Ft)} faces (decimated), "
+              f"arm-axis={info['arm']} wrists={info['wxR']:.3f}/{info['wxL']:.3f}  grafted -> {len(V2)} verts {len(F2)} faces",
+              flush=True)
+        try:
+            _np.savez(os.path.join(DBG, "handgraft_out.npz"), V=V2, F=F2)
+        except Exception as e:
+            print("[ReplaceHandsWithDonor] dump-out failed:", e, flush=True)
+        return (TM.Trimesh(vertices=V2.astype(_np.float64), faces=F2.astype(_np.int64), process=False),)
+
+
+NODE_CLASS_MAPPINGS = {"ReplaceHandsWithDonor": ReplaceHandsWithDonor}
+NODE_DISPLAY_NAME_MAPPINGS = {"ReplaceHandsWithDonor": "Replace Hands With Donor (skeleton-free)"}

@@ -24,3 +24,39 @@ web_custom_versions/
 filtered-openapi.yaml
 uv.lock
 .comfy_environment
+
+# ============================================================
+# Character pipeline work (added 2026-09-02)
+# ComfyUI ignores /custom_nodes/ and /user/ wholesale. Our own
+# packs and workflows live there and had NO version control at
+# all, so re-include exactly those paths.
+# ============================================================
+!/custom_nodes/
+/custom_nodes/*
+!/custom_nodes/ComfyUI-FlattenLight/
+!/custom_nodes/ComfyUI-HandGraft/
+
+!/user/
+/user/*
+!/user/default/
+/user/default/*
+!/user/default/workflows/
+
+# uv_transfer: keep the scripts, skip the diagnostic sprawl (2.4 GB
+# of renders/npz dumps). Already-tracked binaries stay tracked.
+uv_transfer/*.png
+uv_transfer/*.npz
+uv_transfer/*.npy
+uv_transfer/*.blend1
+uv_transfer/*.glb
+uv_transfer/*.fbx
+uv_transfer/*.log
+uv_transfer/*.txt
+uv_transfer/_backups/
+uv_transfer/_seambackups/
+uv_transfer/_frozen/
+uv_transfer/_BACKUP_*/
+uv_transfer/*.blend
+uv_transfer/*.obj
+uv_transfer/*.bak
+uv_transfer/*.bak*
