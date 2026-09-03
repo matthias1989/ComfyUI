@@ -130,6 +130,11 @@ def texture_genital(obj, out_dir, res=2048):
     zones[genvert & (danus < ANUS_OPEN_R)] = 6
 
     # adjacency over genital verts (shared by the feather alpha, the material flag, and the colour feather)
+    # Seeded on the genital verts, but CLOSED under traversal: the ring growth below deliberately
+    # walks off the genital into the body (that is what makes the alpha ramp fade onto body skin),
+    # so every vertex reachable as a neighbour must itself be a key. Keying only the genital verts
+    # while storing body verts as values left the graph one-directional and the walk raised
+    # KeyError on the first body vertex it stepped onto.
     nb = {i: set() for i in np.where(genvert)[0]}
     for p in me.polygons:
         vs = [v for v in p.vertices if v in nb]
@@ -137,6 +142,7 @@ def texture_genital(obj, out_dir, res=2048):
             for b in p.vertices:
                 if a != b:
                     nb[a].add(b)
+                    nb.setdefault(b, set()).add(a)
 
     # 2b) feather alpha + material flag, from ring-distance to the FEATURE verts (zones 1-6).
     #     alpha: 1 on the features, ramping to 0 by RAMP rings -- the FBXExport composite then reads BODY skin
