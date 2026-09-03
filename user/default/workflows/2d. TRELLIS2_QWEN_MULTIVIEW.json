@@ -1,8 +1,8 @@
 {
   "id": "trellis2-qwen-mv",
   "revision": 0,
-  "last_node_id": 103,
-  "last_link_id": 173,
+  "last_node_id": 107,
+  "last_link_id": 180,
   "nodes": [
     {
       "id": 2,
@@ -922,10 +922,7 @@
           "links": [
             32,
             86,
-            90,
-            111,
-            132,
-            153
+            90
           ]
         },
         {
@@ -934,7 +931,8 @@
           "type": "STRING",
           "slot_index": 1,
           "links": [
-            51
+            51,
+            174
           ]
         }
       ],
@@ -3029,81 +3027,6 @@
       "widgets_values": []
     },
     {
-      "id": 71,
-      "type": "Trellis2RenderViewFromMesh",
-      "pos": [
-        820,
-        1500
-      ],
-      "size": [
-        330,
-        180
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "trimesh",
-          "name": "trimesh",
-          "type": "TRIMESH",
-          "link": 111
-        },
-        {
-          "localized_name": "azimuth",
-          "name": "azimuth",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "elevation",
-          "name": "elevation",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "ortho_scale",
-          "name": "ortho_scale",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "norm_size",
-          "name": "norm_size",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "render_size",
-          "name": "render_size",
-          "type": "INT",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "rendered_view",
-          "name": "rendered_view",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            112
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Trellis2RenderViewFromMesh"
-      },
-      "widgets_values": [
-        90.0,
-        0.0,
-        1.15,
-        1.15,
-        1024
-      ],
-      "title": "render mesh @ az90"
-    },
-    {
       "id": 72,
       "type": "Canny",
       "pos": [
@@ -3122,7 +3045,7 @@
           "localized_name": "image",
           "name": "image",
           "type": "IMAGE",
-          "link": 112
+          "link": 176
         },
         {
           "localized_name": "low_threshold",
@@ -3733,81 +3656,6 @@
       "title": "OUT LEFT"
     },
     {
-      "id": 82,
-      "type": "Trellis2RenderViewFromMesh",
-      "pos": [
-        1240,
-        1500
-      ],
-      "size": [
-        330,
-        180
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "trimesh",
-          "name": "trimesh",
-          "type": "TRIMESH",
-          "link": 132
-        },
-        {
-          "localized_name": "azimuth",
-          "name": "azimuth",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "elevation",
-          "name": "elevation",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "ortho_scale",
-          "name": "ortho_scale",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "norm_size",
-          "name": "norm_size",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "render_size",
-          "name": "render_size",
-          "type": "INT",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "rendered_view",
-          "name": "rendered_view",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            133
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Trellis2RenderViewFromMesh"
-      },
-      "widgets_values": [
-        180.0,
-        0.0,
-        1.15,
-        1.15,
-        1024
-      ],
-      "title": "render mesh @ az180"
-    },
-    {
       "id": 83,
       "type": "Canny",
       "pos": [
@@ -3826,7 +3674,7 @@
           "localized_name": "image",
           "name": "image",
           "type": "IMAGE",
-          "link": 133
+          "link": 178
         },
         {
           "localized_name": "low_threshold",
@@ -4437,81 +4285,6 @@
       "title": "OUT BACK"
     },
     {
-      "id": 93,
-      "type": "Trellis2RenderViewFromMesh",
-      "pos": [
-        1660,
-        1500
-      ],
-      "size": [
-        330,
-        180
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "trimesh",
-          "name": "trimesh",
-          "type": "TRIMESH",
-          "link": 153
-        },
-        {
-          "localized_name": "azimuth",
-          "name": "azimuth",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "elevation",
-          "name": "elevation",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "ortho_scale",
-          "name": "ortho_scale",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "norm_size",
-          "name": "norm_size",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "render_size",
-          "name": "render_size",
-          "type": "INT",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "rendered_view",
-          "name": "rendered_view",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            154
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Trellis2RenderViewFromMesh"
-      },
-      "widgets_values": [
-        270.0,
-        0.0,
-        1.15,
-        1.15,
-        1024
-      ],
-      "title": "render mesh @ az270"
-    },
-    {
       "id": 94,
       "type": "Canny",
       "pos": [
@@ -4530,7 +4303,7 @@
           "localized_name": "image",
           "name": "image",
           "type": "IMAGE",
-          "link": 154
+          "link": 180
         },
         {
           "localized_name": "low_threshold",
@@ -5139,6 +4912,252 @@
         "3D/QWEN_RIGHT"
       ],
       "title": "OUT RIGHT"
+    },
+    {
+      "id": 104,
+      "type": "Trellis2RenderClayView",
+      "pos": [
+        700,
+        1500
+      ],
+      "size": [
+        320,
+        220
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "obj_path",
+          "name": "obj_path",
+          "type": "STRING",
+          "link": 174
+        },
+        {
+          "localized_name": "azimuths",
+          "name": "azimuths",
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "elevation",
+          "name": "elevation",
+          "type": "FLOAT",
+          "link": null
+        },
+        {
+          "localized_name": "ortho_scale",
+          "name": "ortho_scale",
+          "type": "FLOAT",
+          "link": null
+        },
+        {
+          "localized_name": "norm_size",
+          "name": "norm_size",
+          "type": "FLOAT",
+          "link": null
+        },
+        {
+          "localized_name": "render_size",
+          "name": "render_size",
+          "type": "INT",
+          "link": null
+        },
+        {
+          "localized_name": "shading",
+          "name": "shading",
+          "type": "COMBO",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "rendered_views",
+          "name": "rendered_views",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            175,
+            177,
+            179
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2RenderClayView"
+      },
+      "widgets_values": [
+        "90,180,270",
+        0.0,
+        1.15,
+        1.15,
+        512,
+        "normal"
+      ],
+      "title": "mesh normals @ 90/180/270"
+    },
+    {
+      "id": 105,
+      "type": "ImageFromBatch",
+      "pos": [
+        820,
+        1500
+      ],
+      "size": [
+        280,
+        110
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 175
+        },
+        {
+          "localized_name": "batch_index",
+          "name": "batch_index",
+          "type": "INT",
+          "link": null
+        },
+        {
+          "localized_name": "length",
+          "name": "length",
+          "type": "INT",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            176
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageFromBatch"
+      },
+      "widgets_values": [
+        0,
+        1
+      ],
+      "title": "view 90"
+    },
+    {
+      "id": 106,
+      "type": "ImageFromBatch",
+      "pos": [
+        1240,
+        1500
+      ],
+      "size": [
+        280,
+        110
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 177
+        },
+        {
+          "localized_name": "batch_index",
+          "name": "batch_index",
+          "type": "INT",
+          "link": null
+        },
+        {
+          "localized_name": "length",
+          "name": "length",
+          "type": "INT",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            178
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageFromBatch"
+      },
+      "widgets_values": [
+        1,
+        1
+      ],
+      "title": "view 180"
+    },
+    {
+      "id": 107,
+      "type": "ImageFromBatch",
+      "pos": [
+        1660,
+        1500
+      ],
+      "size": [
+        280,
+        110
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 179
+        },
+        {
+          "localized_name": "batch_index",
+          "name": "batch_index",
+          "type": "INT",
+          "link": null
+        },
+        {
+          "localized_name": "length",
+          "name": "length",
+          "type": "INT",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            180
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageFromBatch"
+      },
+      "widgets_values": [
+        2,
+        1
+      ],
+      "title": "view 270"
     }
   ],
   "links": [
@@ -5487,22 +5506,6 @@
       "LATENT"
     ],
     [
-      111,
-      19,
-      0,
-      71,
-      0,
-      "TRIMESH"
-    ],
-    [
-      112,
-      71,
-      0,
-      72,
-      0,
-      "IMAGE"
-    ],
-    [
       113,
       72,
       0,
@@ -5652,22 +5655,6 @@
       0,
       8,
       3,
-      "IMAGE"
-    ],
-    [
-      132,
-      19,
-      0,
-      82,
-      0,
-      "TRIMESH"
-    ],
-    [
-      133,
-      82,
-      0,
-      83,
-      0,
       "IMAGE"
     ],
     [
@@ -5823,22 +5810,6 @@
       "IMAGE"
     ],
     [
-      153,
-      19,
-      0,
-      93,
-      0,
-      "TRIMESH"
-    ],
-    [
-      154,
-      93,
-      0,
-      94,
-      0,
-      "IMAGE"
-    ],
-    [
       155,
       94,
       0,
@@ -5988,6 +5959,62 @@
       0,
       8,
       4,
+      "IMAGE"
+    ],
+    [
+      174,
+      19,
+      1,
+      104,
+      0,
+      "STRING"
+    ],
+    [
+      175,
+      104,
+      0,
+      105,
+      0,
+      "IMAGE"
+    ],
+    [
+      176,
+      105,
+      0,
+      72,
+      0,
+      "IMAGE"
+    ],
+    [
+      177,
+      104,
+      0,
+      106,
+      0,
+      "IMAGE"
+    ],
+    [
+      178,
+      106,
+      0,
+      83,
+      0,
+      "IMAGE"
+    ],
+    [
+      179,
+      104,
+      0,
+      107,
+      0,
+      "IMAGE"
+    ],
+    [
+      180,
+      107,
+      0,
+      94,
+      0,
       "IMAGE"
     ]
   ],

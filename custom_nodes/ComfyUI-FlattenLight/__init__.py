@@ -2733,11 +2733,81 @@ print("[FBXExport] *** FBX saved:", r'{fbx_path}', "***")
         return (fbx_path, pil_to_tensor(eye_tex_l_pil), pil_to_tensor(eye_tex_r_pil))
 
 
+
+class Trellis2RenderClayView:
+    """Render an UNTEXTURED mesh from several azimuths, as a Canny/edge reference.
+
+    Trellis2RenderViewFromMesh and Trellis2RenderMultiView both require a baseColorTexture /
+    material; at the SmartUV stage the mesh has neither, so both raise. This renders raw
+    geometry via clay_multiview.py, which drives the Trellis2 pack's own blender_render.py so
+    normalisation (auto_center_and_scale/norm_size) and the ortho camera match the texturing
+    stage exactly. All views come from ONE Blender session -- importing a 300k-face OBJ costs
+    ~25 s, and doing it per view paid that three times over.
+
+    Shading is the surface NORMAL emitted as colour, not lit clay: lit clay renders as a flat
+    white silhouette whose Canny is just an outline, while normals give spine, shoulder blades,
+    buttocks and hair grooves.
+    """
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "obj_path":    ("STRING", {"tooltip": "OBJ from Trellis2BlenderSmartUV (obj_path output)."}),
+                "azimuths":    ("STRING", {"default": "90,180,270",
+                                           "tooltip": "0=front, 90=left, 180=back, 270=right."}),
+                "elevation":   ("FLOAT", {"default": 0.0, "min": -90.0, "max": 90.0, "step": 1.0}),
+                "ortho_scale": ("FLOAT", {"default": 1.15, "min": 0.1, "max": 5.0, "step": 0.01,
+                                          "tooltip": "Must match the texturing node's ortho_scale."}),
+                "norm_size":   ("FLOAT", {"default": 1.15, "min": 0.1, "max": 5.0, "step": 0.01,
+                                          "tooltip": "Must match the texturing node's norm_size."}),
+                "render_size": ("INT",   {"default": 512, "min": 256, "max": 2048, "step": 64}),
+                "shading":     (["normal", "clay"], {"default": "normal"}),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("rendered_views",)
+    FUNCTION = "execute"
+    CATEGORY = "Trellis2Wrapper"
+
+    def execute(self, obj_path, azimuths, elevation, ortho_scale, norm_size, render_size, shading):
+        import subprocess, tempfile, numpy as _np, torch as _t
+        from PIL import Image as _Img
+
+        script = os.path.join(HERE, "clay_multiview.py")
+        if not os.path.exists(script):
+            raise RuntimeError("[RenderClayView] clay_multiview.py missing at " + script)
+        if not obj_path or not os.path.exists(obj_path):
+            raise RuntimeError("[RenderClayView] obj_path missing: " + repr(obj_path))
+
+        az = [a.strip() for a in str(azimuths).split(",") if a.strip()]
+        td = tempfile.mkdtemp(prefix="clayviews_")
+        cmd = [BLENDER_EXE, "--background", "--python", script, "--",
+               "--mesh", obj_path, "--outdir", td, "--azims", ",".join(az),
+               "--elev", str(float(elevation)), "--scale", str(float(ortho_scale)),
+               "--norm_size", str(float(norm_size)), "--resolution", str(int(render_size)),
+               "--shading", shading]
+        r = subprocess.run(cmd, capture_output=True, text=True)
+
+        frames = []
+        for a in az:
+            f = os.path.join(td, "view_%d.png" % int(round(float(a))))
+            if not os.path.exists(f):
+                raise RuntimeError("[RenderClayView] missing view %s: %s%s"
+                                   % (a, (r.stdout or "")[-1500:], (r.stderr or "")[-800:]))
+            frames.append(_np.asarray(_Img.open(f).convert("RGB")).astype(_np.float32) / 255.0)
+        print("[RenderClayView] %d views (%s) shading=%s from %s"
+              % (len(frames), ",".join(az), shading, obj_path), flush=True)
+        return (_t.from_numpy(_np.stack(frames, 0)),)
+
+
 NODE_CLASS_MAPPINGS = {
     "FlattenLight":           FlattenLight,
     "Trellis2BlenderSmartUV": Trellis2BlenderSmartUV,
     "Trellis2XAtlasUnwrap":   Trellis2XAtlasUnwrap,
     "Trellis2FBXExport":      Trellis2FBXExport,
+    "Trellis2RenderClayView": Trellis2RenderClayView,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -2745,6 +2815,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Trellis2BlenderSmartUV": "Trellis2 - Blender Decimate + Zone UV",
     "Trellis2XAtlasUnwrap":   "Trellis2 - XAtlas UV Unwrap",
     "Trellis2FBXExport":      "Trellis2 - FBX Export (hard edges)",
+    "Trellis2RenderClayView": "Trellis2 - Render Clay View (untextured, for Canny)",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
