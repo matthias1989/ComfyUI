@@ -775,7 +775,7 @@
     },
     {
       "id": 59,
-      "type": "ReplaceHandsWithDonor",
+      "type": "Trellis2SimplifyTrimesh",
       "pos": [
         1700,
         420
@@ -807,12 +807,13 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "ReplaceHandsWithDonor"
+        "Node name for S&R": "Trellis2SimplifyTrimesh"
       },
       "widgets_values": [
-        0.5,
-        135000
-      ]
+        135000,
+        "Cumesh"
+      ],
+      "title": "Decimate to 135k (no graft - probe measures generation)"
     },
     {
       "id": 60,
