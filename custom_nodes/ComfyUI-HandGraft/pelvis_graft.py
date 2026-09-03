@@ -1032,6 +1032,9 @@ if __name__ == "__main__":
     in_blend = _argval("--in_blend")   # PIPELINE mode: graft the genital into an existing (remeshed) blend
     body = _argval("--body"); out = _argval("--out"); blend = _argval("--blend")
     vox_body = "--voxel_body" in (sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv)
+    # --local: use the PIPELINE recipe (lean cut-join, no whole-body fuse, no GPU sculpt) from the
+    # CLI too, so the graft can be replayed headlessly on a saved body npz without the 12-min bake.
+    use_local = "--local" in (sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv)
     try:
         if in_blend:
             # PIPELINE: graft the high-detail genital onto the ALREADY-REMESHED body in `in_blend`
@@ -1086,10 +1089,22 @@ if __name__ == "__main__":
             for ob in list(bpy.data.objects):
                 bpy.data.objects.remove(ob, do_unlink=True)
             d = np.load(body)
-            V, F, o = graft_pelvis(d["V"], d["F"], voxel_body=vox_body)
+            V, F, o = graft_pelvis(d["V"], d["F"], voxel_body=vox_body, local=use_local)
             print(f"[pelvis_graft] done: {len(V)} verts, {len(F)} faces", flush=True)
             if out:
-                np.savez(out, V=np.asarray(V, np.float32), F=np.asarray(F, np.int64))
+                # graft_pelvis returns the body's ORIGINAL face list, which is quads+tris mixed;
+                # np.asarray cannot make that rectangular. Fan-triangulate for the npz so the CLI
+                # replay can be inspected. (The pipeline path saves a .blend and keeps the quads.)
+                try:
+                    _F = np.asarray(F, np.int64)
+                except ValueError:
+                    _tri = []
+                    for _f in F:
+                        for _i in range(1, len(_f) - 1):
+                            _tri.append([_f[0], _f[_i], _f[_i + 1]])
+                    _F = np.asarray(_tri, np.int64)
+                    print(f"[pelvis_graft] npz: fan-triangulated {len(F)} polys -> {len(_F)} tris", flush=True)
+                np.savez(out, V=np.asarray(V, np.float32), F=_F)
             if blend:
                 bpy.ops.wm.save_as_mainfile(filepath=blend)
     except Exception:
