@@ -2775,7 +2775,7 @@ class Trellis2RenderClayView:
         import subprocess, tempfile, numpy as _np, torch as _t
         from PIL import Image as _Img
 
-        script = os.path.join(HERE, "clay_multiview.py")
+        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clay_multiview.py")
         if not os.path.exists(script):
             raise RuntimeError("[RenderClayView] clay_multiview.py missing at " + script)
         if not obj_path or not os.path.exists(obj_path):
