@@ -211,9 +211,39 @@ def _graft_cutjoin(ob, W, Fd, A):
             n = nx[0]; lp.append(n); seen.add(n); prev = cur; cur = n
         if len(lp) > 6: loops.append(lp)
     loops.sort(key=len, reverse=True); loop = loops[0]
+    _pre = np.array([W[li] for li in loop])
     for li in loop:
         o = Vector(W[li].tolist()); ok, cp, nn, ix = ob.closest_point_on_mesh(o)
         if ok: W[li] = np.array(cp.to_tuple())
+    # Nearest-point projection is NOT injective: neighbouring rim verts land on the same body
+    # point (measured min spacing 0.00000 after snap, vs 0.00025 before) while others stretch,
+    # taking max/median spacing from 3.2 to 5.2. Those degenerate and stretched segments become
+    # the sliver fan above the vulva when the rim is stitched to the hole.
+    # Re-space the rim UNIFORMLY along its own snapped polyline: the loop keeps exactly the shape
+    # the snap gave it (so it still lies on the body), only the vertex distribution is evened out.
+    _P = np.array([W[li] for li in loop])
+    _d = np.linalg.norm(np.roll(_P, -1, axis=0) - _P, axis=1)
+    _cum = np.concatenate([[0.0], np.cumsum(_d)]); _tot = _cum[-1]
+    if _tot > 1e-9:
+        _tg = np.arange(len(loop)) * (_tot / len(loop))
+        _new = np.empty_like(_P)
+        for _k, _t in enumerate(_tg):
+            _i = min(int(np.searchsorted(_cum, _t, side='right')) - 1, len(_P) - 1)
+            _seg = _d[_i] if _d[_i] > 1e-12 else 1.0
+            _f = (_t - _cum[_i]) / _seg
+            _new[_k] = _P[_i] * (1.0 - _f) + _P[(_i + 1) % len(_P)] * _f
+        for _k, li in enumerate(loop):
+            W[li] = _new[_k]
+    _post = np.array([W[li] for li in loop])
+    def _seg(P):
+        d = np.linalg.norm(P - np.roll(P, -1, axis=0), axis=1)
+        return d.min(), np.median(d), d.max()
+    _b = _seg(_pre); _a = _seg(_post)
+    _mv = np.linalg.norm(_post - _pre, axis=1)
+    print(f"[cutjoin] rim spacing BEFORE snap min/med/max = {_b[0]:.5f}/{_b[1]:.5f}/{_b[2]:.5f}", flush=True)
+    print(f"[cutjoin] rim spacing AFTER  snap min/med/max = {_a[0]:.5f}/{_a[1]:.5f}/{_a[2]:.5f}", flush=True)
+    print(f"[cutjoin] snap moved verts med {np.median(_mv):.5f} max {_mv.max():.5f}; "
+          f"spacing ratio max/med {_b[2]/max(_b[1],1e-9):.1f} -> {_a[2]/max(_a[1],1e-9):.1f}", flush=True)
     poly = np.array([[(W[li] - A) @ u, (W[li] - A) @ v] for li in loop])
     def _inp(px, py, P):
         c = False; n = len(P); j = n - 1
@@ -271,6 +301,7 @@ def _graft_cutjoin(ob, W, Fd, A):
     if _sar(R) * _sar(H) < 0: H = H[::-1]
     a0 = _ang(R[0]); j0 = int(np.argmin([abs(((_ang(h) - a0 + np.pi) % (2 * np.pi)) - np.pi) for h in H])); H = H[j0:] + H[:j0]
     nR = len(R); nH = len(H); i = j = 0
+    print(f"[cutjoin] rim verts nR={nR}  hole verts nH={nH}  ratio={nR/max(nH,1):.2f}", flush=True)
     for _ in range(nR + nH):
         if i < nR and (j >= nH or (i + 1) / nR <= (j + 1) / nH):
             try: bmb.faces.new([R[i % nR], R[(i + 1) % nR], H[j % nH]])
