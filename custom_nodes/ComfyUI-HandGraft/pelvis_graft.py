@@ -123,8 +123,17 @@ def _place(Vt):
     f = np.load(A_PLACE); L = f["L"]; A = f["A"].copy(); ref_w = float(f["ref_width"]); Gc = f["Gc"]
     A[1] += PLACE_DY; A[2] += PLACE_DZ   # recess the whole region (reduce sticking out)
     dd = np.load(A_DONOR); Vd = dd["V"].astype(float); Fd = dd["F"].astype(int)
-    lj = _leg_junction_Y(Vt)
-    band = Vt[(Vt[:, 1] > lj - 0.05) & (Vt[:, 1] < lj + 0.06)]
+    # Scale the donor by the body width WHERE THE DONOR ACTUALLY SITS -- the anchor -- not at a
+    # separately detected "leg junction".
+    # _leg_junction_Y returns the FIRST y (scanning up from the feet) with >20 verts near the
+    # midline, which is where the inner THIGHS touch, not the crotch. On a legs-together pose
+    # that is far below the pelvis: on character_posed_00003_ it landed at 28% of body height,
+    # so the band was measured across the thighs (X width 0.2700) and scaled the donor to
+    # ratio 1.1819 -- 18% oversize. An oversized donor rim cannot match the hole cut in the
+    # body, and the stitch fans out into long spikes at the vulva.
+    # ref_w is itself calibrated at the anchor: on this body the anchor band measures 0.2286
+    # against ref_width 0.2284, i.e. ratio 1.0005 -- the donor was authored for this size.
+    band = Vt[(Vt[:, 1] > A[1] - 0.05) & (Vt[:, 1] < A[1] + 0.06)]
     ratio = np.ptp(band[:, 0]) / ref_w
     W = ((Vd - Gc) * GS) @ (L.T * ratio) + A
     return W, Fd, A
