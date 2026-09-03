@@ -46,6 +46,11 @@ RIM_SNAP_CLAMP = float(os.environ.get("PELVIS_RIM_CLAMP", "2.0"))   # swept 1.0-
 # in the voxel body is as jagged as the voxel grid; the stitch inherits that from the other side.
 HOLE_RELAX_ITERS = int(os.environ.get("PELVIS_HOLE_RELAX_ITERS", "0"))
 HOLE_RELAX       = float(os.environ.get("PELVIS_HOLE_RELAX", "0.5"))
+# Pull the cut hole boundary onto the donor rim outline. Flood-cutting along face boundaries
+# traces a staircase, so the hole perimeter came out 1.75x the rim it is stitched to (0.6529 vs
+# 0.3740); that surplus length becomes skewed triangles. Moving the EXISTING hole verts onto the
+# rim outline shortens the staircase without adding a single vertex anywhere.
+HOLE_SNAP = float(os.environ.get("PELVIS_HOLE_SNAP", "0.0"))
 DONOR_X_SCALE = 0.80   # narrow the placed donor in X (width) about the midline; <1 pulls the seam off the thighs
 MORPH_R    = 0.05      # snap: full weight within MORPH_R of the anchor
 MORPH_FALL = 0.022     # ... soft falloff to 0 over this width (blends the genital into the body)
@@ -333,6 +338,28 @@ def _graft_cutjoin(ob, W, Fd, A):
     _h1 = _sp(_HP)
     print(f"[cutjoin] hole loop spacing min/med/max {_h0[0]:.5f}/{_h0[1]:.5f}/{_h0[2]:.5f}"
           f" -> {_h1[0]:.5f}/{_h1[1]:.5f}/{_h1[2]:.5f}  (relax {HOLE_RELAX_ITERS}x{HOLE_RELAX})", flush=True)
+    _RP = np.array([[x.co[0], x.co[1], x.co[2]] for x in R], float)
+    _HQ = np.array([[x.co[0], x.co[1], x.co[2]] for x in H], float)
+    _per = lambda P: float(np.linalg.norm(np.roll(P, -1, axis=0) - P, axis=1).sum())
+    _pr, _ph = _per(_RP), _per(_HQ)
+    _gap = np.linalg.norm(_RP[:, None, :] - _HQ[None, :, :], axis=2).min(1)
+    print(f"[cutjoin] perimeter rim {_pr:.4f}  hole {_ph:.4f}  ratio {_ph/max(_pr,1e-9):.2f}", flush=True)
+    print(f"[cutjoin] rim->hole gap  min {_gap.min():.5f}  med {np.median(_gap):.5f}  max {_gap.max():.5f}"
+          f"  (rim spacing {_pr/len(R):.5f})", flush=True)
+    print(f"[cutjoin] gap / rim-spacing  med {np.median(_gap)/(_pr/len(R)):.1f}x  max {_gap.max()/(_pr/len(R)):.1f}x", flush=True)
+    if HOLE_SNAP > 0.0:
+        _A2 = _RP; _B2 = np.roll(_RP, -1, axis=0); _AB = _B2 - _A2
+        _den = np.maximum((_AB * _AB).sum(1), 1e-18)
+        _newH = np.empty_like(_HQ)
+        for _k, _p in enumerate(_HQ):
+            _t = np.clip((((_p - _A2) * _AB).sum(1)) / _den, 0.0, 1.0)
+            _pr2 = _A2 + _t[:, None] * _AB
+            _newH[_k] = _pr2[int(np.argmin(np.linalg.norm(_pr2 - _p, axis=1)))]
+        _HQ = _HQ + HOLE_SNAP * (_newH - _HQ)
+        for _k, _h in enumerate(H):
+            _h.co = Vector(_HQ[_k].tolist())
+        print(f"[cutjoin] hole->rim snap {HOLE_SNAP}: perimeter {_ph:.4f} -> {_per(_HQ):.4f} "
+              f"(rim {_pr:.4f}, ratio {_per(_HQ)/max(_pr,1e-9):.2f})", flush=True)
     nR = len(R); nH = len(H); i = j = 0
     print(f"[cutjoin] rim verts nR={nR}  hole verts nH={nH}  ratio={nR/max(nH,1):.2f}", flush=True)
     for _ in range(nR + nH):
