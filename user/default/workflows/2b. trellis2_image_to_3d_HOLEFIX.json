@@ -2197,7 +2197,7 @@
         "Node name for S&R": "Trellis2FillHolesWithCuMesh"
       },
       "widgets_values": [
-        0.15
+        1.0
       ]
     },
     {
@@ -2442,7 +2442,7 @@
         "Node name for S&R": "Trellis2FillHolesWithCuMesh"
       },
       "widgets_values": [
-        0.15
+        1.0
       ],
       "title": "GPU fill AFTER remesh"
     }
