@@ -1,8 +1,8 @@
 {
   "id": "247f0d51-15d1-43ba-9196-09e4e0fb434c-holefix-texab",
   "revision": 0,
-  "last_node_id": 58,
-  "last_link_id": 100,
+  "last_node_id": 59,
+  "last_link_id": 102,
   "nodes": [
     {
       "id": 2,
@@ -174,7 +174,6 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            3,
             25
           ]
         }
@@ -213,7 +212,7 @@
           "localized_name": "image",
           "name": "image",
           "type": "IMAGE",
-          "link": 3
+          "link": 102
         },
         {
           "localized_name": "seed",
@@ -1139,7 +1138,8 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            1
+            1,
+            101
           ]
         },
         {
@@ -2438,6 +2438,49 @@
         "3D/AB_trellisnative_MR"
       ],
       "title": "B: metallic/roughness"
+    },
+    {
+      "id": 59,
+      "type": "Trellis2PreProcessImage",
+      "pos": [
+        430,
+        700
+      ],
+      "size": [
+        315,
+        150
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 101
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            102
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage"
+      },
+      "widgets_values": [
+        96,
+        true,
+        2048
+      ],
+      "title": "PreProcess for GEOMETRY (padding 96 = TRELLIS 1.2x framing)"
     }
   ],
   "links": [
@@ -2464,14 +2507,6 @@
       4,
       0,
       "TRELLIS2PIPELINE"
-    ],
-    [
-      3,
-      3,
-      0,
-      4,
-      1,
-      "IMAGE"
     ],
     [
       4,
@@ -2711,6 +2746,22 @@
       2,
       58,
       0,
+      "IMAGE"
+    ],
+    [
+      101,
+      1,
+      0,
+      59,
+      0,
+      "IMAGE"
+    ],
+    [
+      102,
+      59,
+      0,
+      4,
+      1,
       "IMAGE"
     ]
   ],
