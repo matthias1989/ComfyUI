@@ -1,8 +1,8 @@
 {
   "id": "247f0d51-15d1-43ba-9196-09e4e0fb434c-holefix-texab",
   "revision": 0,
-  "last_node_id": 59,
-  "last_link_id": 102,
+  "last_node_id": 61,
+  "last_link_id": 104,
   "nodes": [
     {
       "id": 2,
@@ -409,7 +409,7 @@
           "localized_name": "mesh",
           "name": "mesh",
           "type": "MESHWITHVOXEL",
-          "link": 93
+          "link": 104
         },
         {
           "localized_name": "remesh_band",
@@ -2481,6 +2481,84 @@
         2048
       ],
       "title": "PreProcess for GEOMETRY (padding 96 = TRELLIS 1.2x framing)"
+    },
+    {
+      "id": 60,
+      "type": "Trellis2UnloadAllModels",
+      "pos": [
+        1180,
+        600
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "input_1",
+          "name": "input_1",
+          "type": "*",
+          "link": 93
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "output_1",
+          "name": "output_1",
+          "type": "*",
+          "slot_index": 0,
+          "links": [
+            103
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2UnloadAllModels"
+      },
+      "widgets_values": [],
+      "title": "free VRAM before remesh"
+    },
+    {
+      "id": 61,
+      "type": "Trellis2CudaReset",
+      "pos": [
+        1180,
+        700
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "input_1",
+          "name": "input_1",
+          "type": "*",
+          "link": 103
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "output_1",
+          "name": "output_1",
+          "type": "*",
+          "slot_index": 0,
+          "links": [
+            104
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2CudaReset"
+      },
+      "widgets_values": [],
+      "title": "empty CUDA cache"
     }
   ],
   "links": [
@@ -2688,7 +2766,7 @@
       93,
       53,
       0,
-      16,
+      60,
       0,
       "MESHWITHVOXEL"
     ],
@@ -2763,6 +2841,22 @@
       4,
       1,
       "IMAGE"
+    ],
+    [
+      103,
+      60,
+      0,
+      61,
+      0,
+      "*"
+    ],
+    [
+      104,
+      61,
+      0,
+      16,
+      0,
+      "MESHWITHVOXEL"
     ]
   ],
   "groups": [],
