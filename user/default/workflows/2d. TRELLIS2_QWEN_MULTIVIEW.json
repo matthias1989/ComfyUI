@@ -4988,6 +4988,7 @@
         "Node name for S&R": "Trellis2RenderClayView"
       },
       "widgets_values": [
+        "",
         "90,180,270",
         0.0,
         1.15,
