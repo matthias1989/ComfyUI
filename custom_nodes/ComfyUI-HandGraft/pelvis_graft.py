@@ -51,6 +51,13 @@ HOLE_RELAX       = float(os.environ.get("PELVIS_HOLE_RELAX", "0.5"))
 # 0.3740); that surplus length becomes skewed triangles. Moving the EXISTING hole verts onto the
 # rim outline shortens the staircase without adding a single vertex anywhere.
 HOLE_SNAP = float(os.environ.get("PELVIS_HOLE_SNAP", "0.0"))
+# Graded transition ring. Donor core sits at 0.33x the body edge length and the step to 1.00x is
+# crossed in ONE shell (0.51x -> 0.90x). Refine the BODY only, in a narrow annulus around the
+# anchor, so the density walks down instead of falling off a cliff. Donor core and the lean body
+# are both untouched -- this only widens the transition band.
+GRADE_R1   = float(os.environ.get("PELVIS_GRADE_R1", "0.045"))   # inner band outer radius (2 cuts)
+GRADE_R2   = float(os.environ.get("PELVIS_GRADE_R2", "0.070"))   # mid band outer radius  (1 cut)
+GRADE_CUTS = int(os.environ.get("PELVIS_GRADE_CUTS", "0"))       # 0 = off
 DONOR_X_SCALE = 0.80   # narrow the placed donor in X (width) about the midline; <1 pulls the seam off the thighs
 MORPH_R    = 0.05      # snap: full weight within MORPH_R of the anchor
 MORPH_FALL = 0.022     # ... soft falloff to 0 over this width (blends the genital into the body)
@@ -183,6 +190,25 @@ def _adj(F2, mask, pad=0.01, dA=None, lim=None):
                 x, y = fl[k], fl[(k + 1) % n]; a[x].add(y); a[y].add(x)
     return a
 
+
+def _grade_ring(ob, A, r1, r2, cuts):
+    """Locally refine the body around the graft anchor so the donor->body density step is walked
+    down over two bands instead of one shell. Inner band gets `cuts` cuts, mid band gets one fewer.
+    Adds geometry ONLY inside r2 of the anchor; the rest of the body is untouched."""
+    A = np.asarray(A, float)
+    for lo, hi, nc in ((0.0, r1, cuts), (r1, r2, max(cuts - 1, 1))):
+        if nc <= 0: continue
+        bm = bmesh.new(); bm.from_mesh(ob.data); bm.faces.ensure_lookup_table()
+        es = set()
+        for f in bm.faces:
+            d = float(np.linalg.norm(np.array(f.calc_center_median()) - A))
+            if lo <= d < hi:
+                for e in f.edges: es.add(e)
+        n0 = len(bm.faces)
+        if es:
+            bmesh.ops.subdivide_edges(bm, edges=list(es), cuts=nc, use_grid_fill=True)
+        print(f"[grade] band {lo:.3f}-{hi:.3f}: {len(es)} edges, {nc} cuts -> faces {n0} -> {len(bm.faces)}", flush=True)
+        bm.to_mesh(ob.data); bm.free()
 
 def _graft_cutjoin(ob, W, Fd, A):
     """Cut-and-JOIN graft (KAN-18, 2026-06-24, HEADLESS). Flood-cut the body under the donor (this OPENS the
@@ -824,6 +850,8 @@ def graft_pelvis(Vt, Ft, voxel_body=True, local=False):
 
     # 1) place donor
     W, Fd, A = _place(Vt)
+    if GRADE_CUTS > 0:
+        _grade_ring(ob, A, GRADE_R1, GRADE_R2, GRADE_CUTS)
     # ===== CUT-AND-JOIN graft (2026-06-24): replaces the old conform+cut+bridge+HC+fuse+GPU-sculpt below.
     # Headless, no surround smoothing -> the body outside the genital is untouched; vulva/anus detail kept.
     # Everything from here to `return V, F, o` supersedes the (now-dead) block beneath this return. =====
