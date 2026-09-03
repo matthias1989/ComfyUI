@@ -1,8 +1,8 @@
 {
   "id": "247f0d51-15d1-43ba-9196-09e4e0fb434c-holefix-texab",
   "revision": 0,
-  "last_node_id": 61,
-  "last_link_id": 104,
+  "last_node_id": 62,
+  "last_link_id": 105,
   "nodes": [
     {
       "id": 2,
@@ -2222,7 +2222,7 @@
           "localized_name": "mesh",
           "name": "mesh",
           "type": "MESHWITHVOXEL",
-          "link": 26
+          "link": 105
         }
       ],
       "outputs": [
@@ -2559,6 +2559,47 @@
       },
       "widgets_values": [],
       "title": "empty CUDA cache"
+    },
+    {
+      "id": 62,
+      "type": "Trellis2FillHolesWithCuMesh",
+      "pos": [
+        1260,
+        880
+      ],
+      "size": [
+        320,
+        60
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "slot_index": 0,
+          "links": [
+            105
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2FillHolesWithCuMesh"
+      },
+      "widgets_values": [
+        0.15
+      ],
+      "title": "GPU fill AFTER remesh"
     }
   ],
   "links": [
@@ -2646,7 +2687,7 @@
       26,
       16,
       0,
-      54,
+      62,
       0,
       "MESHWITHVOXEL"
     ],
@@ -2855,6 +2896,14 @@
       61,
       0,
       16,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      105,
+      62,
+      0,
+      54,
       0,
       "MESHWITHVOXEL"
     ]

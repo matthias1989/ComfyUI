@@ -1,8 +1,8 @@
 {
   "id": "trellis2-qwen-mv",
   "revision": 0,
-  "last_node_id": 107,
-  "last_link_id": 180,
+  "last_node_id": 108,
+  "last_link_id": 181,
   "nodes": [
     {
       "id": 2,
@@ -2224,7 +2224,7 @@
           "localized_name": "mesh",
           "name": "mesh",
           "type": "MESHWITHVOXEL",
-          "link": 26
+          "link": 181
         }
       ],
       "outputs": [
@@ -5159,6 +5159,47 @@
         1
       ],
       "title": "view 270"
+    },
+    {
+      "id": 108,
+      "type": "Trellis2FillHolesWithCuMesh",
+      "pos": [
+        1260,
+        880
+      ],
+      "size": [
+        320,
+        60
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "slot_index": 0,
+          "links": [
+            181
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2FillHolesWithCuMesh"
+      },
+      "widgets_values": [
+        0.15
+      ],
+      "title": "GPU fill AFTER remesh"
     }
   ],
   "links": [
@@ -5246,7 +5287,7 @@
       26,
       16,
       0,
-      54,
+      108,
       0,
       "MESHWITHVOXEL"
     ],
@@ -6017,6 +6058,14 @@
       94,
       0,
       "IMAGE"
+    ],
+    [
+      181,
+      108,
+      0,
+      54,
+      0,
+      "MESHWITHVOXEL"
     ]
   ],
   "groups": [],

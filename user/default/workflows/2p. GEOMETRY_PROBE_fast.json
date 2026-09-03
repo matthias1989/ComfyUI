@@ -1,8 +1,8 @@
 {
   "id": "247f0d51-15d1-43ba-9196-09e4e0fb434c-holefix-probe",
   "revision": 0,
-  "last_node_id": 60,
-  "last_link_id": 103,
+  "last_node_id": 61,
+  "last_link_id": 104,
   "nodes": [
     {
       "id": 2,
@@ -578,7 +578,7 @@
           "localized_name": "mesh",
           "name": "mesh",
           "type": "MESHWITHVOXEL",
-          "link": 26
+          "link": 104
         }
       ],
       "outputs": [
@@ -870,6 +870,47 @@
         1.15
       ],
       "title": "FBX -> output/characters/<name>/"
+    },
+    {
+      "id": 61,
+      "type": "Trellis2FillHolesWithCuMesh",
+      "pos": [
+        1260,
+        880
+      ],
+      "size": [
+        320,
+        60
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "slot_index": 0,
+          "links": [
+            104
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2FillHolesWithCuMesh"
+      },
+      "widgets_values": [
+        0.15
+      ],
+      "title": "GPU fill AFTER remesh"
     }
   ],
   "links": [
@@ -893,7 +934,7 @@
       26,
       16,
       0,
-      54,
+      61,
       0,
       "MESHWITHVOXEL"
     ],
@@ -976,6 +1017,14 @@
       58,
       0,
       "STRING"
+    ],
+    [
+      104,
+      61,
+      0,
+      54,
+      0,
+      "MESHWITHVOXEL"
     ]
   ],
   "groups": [],
