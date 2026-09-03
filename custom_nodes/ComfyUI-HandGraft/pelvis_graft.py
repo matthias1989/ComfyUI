@@ -42,6 +42,10 @@ BODY_VOX   = 0.0028    # body voxel (matches gen_seams target density) -- only i
 # Unclamped, closest_point_on_mesh drags outlier rim verts onto whatever body surface happens to
 # be nearest -- across the gap, onto the far labia or the thigh -- by up to 12x the rim spacing.
 RIM_SNAP_CLAMP = float(os.environ.get("PELVIS_RIM_CLAMP", "2.0"))   # swept 1.0-3.0 on 00003; see commit
+# Body-side hole loop relaxation. The rim is now evenly spaced, but the hole the flood-cut leaves
+# in the voxel body is as jagged as the voxel grid; the stitch inherits that from the other side.
+HOLE_RELAX_ITERS = int(os.environ.get("PELVIS_HOLE_RELAX_ITERS", "0"))
+HOLE_RELAX       = float(os.environ.get("PELVIS_HOLE_RELAX", "0.5"))
 DONOR_X_SCALE = 0.80   # narrow the placed donor in X (width) about the midline; <1 pulls the seam off the thighs
 MORPH_R    = 0.05      # snap: full weight within MORPH_R of the anchor
 MORPH_FALL = 0.022     # ... soft falloff to 0 over this width (blends the genital into the body)
@@ -316,6 +320,19 @@ def _graft_cutjoin(ob, W, Fd, A):
         return float(np.sum(p[:, 0] * np.roll(p[:, 1], -1) - np.roll(p[:, 0], -1) * p[:, 1]))
     if _sar(R) * _sar(H) < 0: H = H[::-1]
     a0 = _ang(R[0]); j0 = int(np.argmin([abs(((_ang(h) - a0 + np.pi) % (2 * np.pi)) - np.pi) for h in H])); H = H[j0:] + H[:j0]
+    _HP = np.array([[h.co[0], h.co[1], h.co[2]] for h in H], float)
+    def _sp(P):
+        dd = np.linalg.norm(np.roll(P, -1, axis=0) - P, axis=1)
+        return dd.min(), np.median(dd), dd.max()
+    _h0 = _sp(_HP)
+    for _ in range(HOLE_RELAX_ITERS):
+        _HP = _HP + HOLE_RELAX * (0.5 * (np.roll(_HP, 1, axis=0) + np.roll(_HP, -1, axis=0)) - _HP)
+    if HOLE_RELAX_ITERS:
+        for _k, _h in enumerate(H):
+            _h.co = Vector(_HP[_k].tolist())
+    _h1 = _sp(_HP)
+    print(f"[cutjoin] hole loop spacing min/med/max {_h0[0]:.5f}/{_h0[1]:.5f}/{_h0[2]:.5f}"
+          f" -> {_h1[0]:.5f}/{_h1[1]:.5f}/{_h1[2]:.5f}  (relax {HOLE_RELAX_ITERS}x{HOLE_RELAX})", flush=True)
     nR = len(R); nH = len(H); i = j = 0
     print(f"[cutjoin] rim verts nR={nR}  hole verts nH={nH}  ratio={nR/max(nH,1):.2f}", flush=True)
     for _ in range(nR + nH):
