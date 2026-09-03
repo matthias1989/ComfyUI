@@ -38,6 +38,10 @@ GS         = float(os.environ.get("PELVIS_GS", "1.10"))  # genital scale (1.0=an
 PLACE_DY   = 0.0       # placement nudge knobs (mesh Y=up/height, Z=depth). 0/0 = pg14. (Recess attempts
 PLACE_DZ   = 0.0       #   didn't visibly help, reverted to 0.)
 BODY_VOX   = 0.0028    # body voxel (matches gen_seams target density) -- only if voxel_body
+# Rim snap clamp, as a multiple of the rim's OWN median snap distance (relative, not absolute).
+# Unclamped, closest_point_on_mesh drags outlier rim verts onto whatever body surface happens to
+# be nearest -- across the gap, onto the far labia or the thigh -- by up to 12x the rim spacing.
+RIM_SNAP_CLAMP = float(os.environ.get("PELVIS_RIM_CLAMP", "2.0"))   # swept 1.0-3.0 on 00003; see commit
 DONOR_X_SCALE = 0.80   # narrow the placed donor in X (width) about the midline; <1 pulls the seam off the thighs
 MORPH_R    = 0.05      # snap: full weight within MORPH_R of the anchor
 MORPH_FALL = 0.022     # ... soft falloff to 0 over this width (blends the genital into the body)
@@ -212,9 +216,21 @@ def _graft_cutjoin(ob, W, Fd, A):
         if len(lp) > 6: loops.append(lp)
     loops.sort(key=len, reverse=True); loop = loops[0]
     _pre = np.array([W[li] for li in loop])
+    _cand = []
     for li in loop:
         o = Vector(W[li].tolist()); ok, cp, nn, ix = ob.closest_point_on_mesh(o)
-        if ok: W[li] = np.array(cp.to_tuple())
+        _cand.append(np.array(cp.to_tuple()) if ok else np.array(W[li], float))
+    _cand = np.array(_cand)
+    _disp = np.linalg.norm(_cand - _pre, axis=1)
+    _lim = RIM_SNAP_CLAMP * float(np.median(_disp))
+    _clamped = 0
+    for _k, li in enumerate(loop):
+        _v = _cand[_k] - _pre[_k]; _n = _disp[_k]
+        if _lim > 0 and _n > _lim:
+            _v = _v * (_lim / _n); _clamped += 1
+        W[li] = _pre[_k] + _v
+    print(f"[cutjoin] rim snap: median {np.median(_disp):.5f} max {_disp.max():.5f}; "
+          f"clamp {RIM_SNAP_CLAMP}x median = {_lim:.5f} -> clamped {_clamped}/{len(loop)}", flush=True)
     # Nearest-point projection is NOT injective: neighbouring rim verts land on the same body
     # point (measured min spacing 0.00000 after snap, vs 0.00025 before) while others stretch,
     # taking max/median spacing from 3.2 to 5.2. Those degenerate and stretched segments become
