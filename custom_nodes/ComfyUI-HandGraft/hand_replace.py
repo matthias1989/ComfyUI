@@ -144,9 +144,14 @@ def find_wrist(V, arm, sign):
         O = V[m].mean(0) if int(m.sum()) else V.mean(0)
         return float(wx), O, full * 0.03
     sm = [(rs[max(0, i - 1)] + rs[i] + rs[min(len(rs) - 1, i + 1)]) / 3 for i in range(len(rs))]
-    peak = next((i for i in range(1, len(sm) - 1)
-                 if sm[i] >= sm[i - 1] and sm[i] > sm[i + 1] and sm[i] > 1.25 * sm[0]), None)
-    if peak is None: peak = max(range(min(6, len(sm))), key=lambda i: sm[i])
+    # Palm bulge = the THICKEST slice inside the hand, which occupies roughly the first
+    # quarter of this half-span scan. Measured absolutely, per side.
+    # The old test compared each slice to 1.25 * sm[0] -- i.e. to the FINGERTIP slice, whose
+    # thickness varies between a character's own two hands by chance. On a real bake the
+    # right hand's tip came in at 0.016 vs the left's 0.013, lifting the bar to 0.0200 so the
+    # palm at 0.019 missed it by 0.001; the scan then ran past the arm and latched a "peak"
+    # in the torso, putting the wrist at -0.09 instead of -0.33 and amputating the arm.
+    peak = max(range(max(3, int(0.25 * len(sm)))), key=lambda i: sm[i])
     torso = next((i for i in range(peak + 1, len(sm)) if sm[i] > 3.0 * sm[peak]), len(sm))   # body onset (radius explodes)
     regain = next((i for i in range(peak + 1, torso) if sm[i] >= sm[peak]), torso)           # forearm regains hand thickness
     end = max(peak + 2, min(regain, torso))
