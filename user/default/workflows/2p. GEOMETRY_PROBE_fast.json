@@ -1,8 +1,8 @@
 {
   "id": "247f0d51-15d1-43ba-9196-09e4e0fb434c-holefix-probe",
   "revision": 0,
-  "last_node_id": 58,
-  "last_link_id": 99,
+  "last_node_id": 60,
+  "last_link_id": 103,
   "nodes": [
     {
       "id": 2,
@@ -448,7 +448,7 @@
           "type": "TRIMESH",
           "slot_index": 0,
           "links": [
-            98
+            100
           ]
         }
       ],
@@ -705,7 +705,7 @@
           "localized_name": "trimesh",
           "name": "trimesh",
           "type": "TRIMESH",
-          "link": 98
+          "link": 101
         }
       ],
       "outputs": [
@@ -715,7 +715,7 @@
           "type": "STRING",
           "slot_index": 0,
           "links": [
-            99
+            102
           ]
         },
         {
@@ -723,7 +723,9 @@
           "name": "STRING",
           "type": "STRING",
           "slot_index": 1,
-          "links": []
+          "links": [
+            103
+          ]
         }
       ],
       "properties": {
@@ -731,7 +733,7 @@
       },
       "widgets_values": [
         "3D/PROBE_geometry",
-        "glb",
+        "obj",
         ""
       ],
       "title": "Export probe mesh"
@@ -758,7 +760,7 @@
           "widget": {
             "name": "model_file"
           },
-          "link": 99
+          "link": 103
         }
       ],
       "outputs": [],
@@ -770,6 +772,103 @@
         ""
       ],
       "title": "Inspect for holes"
+    },
+    {
+      "id": 59,
+      "type": "ReplaceHandsWithDonor",
+      "pos": [
+        1700,
+        420
+      ],
+      "size": [
+        320,
+        82
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "trimesh",
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "link": 100
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "trimesh",
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "slot_index": 0,
+          "links": [
+            101
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ReplaceHandsWithDonor"
+      },
+      "widgets_values": [
+        0.5,
+        135000
+      ]
+    },
+    {
+      "id": 60,
+      "type": "Trellis2FBXExport",
+      "pos": [
+        2500,
+        420
+      ],
+      "size": [
+        420,
+        250
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "obj_path",
+          "name": "obj_path",
+          "type": "STRING",
+          "link": 102
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "fbx_path",
+          "name": "fbx_path",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 1,
+          "links": []
+        },
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 2,
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2FBXExport"
+      },
+      "widgets_values": [
+        "C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/output/characters",
+        1,
+        1.15,
+        1.15
+      ],
+      "title": "FBX -> output/characters/<name>/"
     }
   ],
   "links": [
@@ -846,9 +945,33 @@
       "TRIMESH"
     ],
     [
-      99,
+      100,
+      5,
+      0,
+      59,
+      0,
+      "TRIMESH"
+    ],
+    [
+      101,
+      59,
+      0,
       57,
       0,
+      "TRIMESH"
+    ],
+    [
+      102,
+      57,
+      0,
+      60,
+      0,
+      "STRING"
+    ],
+    [
+      103,
+      57,
+      1,
       58,
       0,
       "STRING"
