@@ -2181,11 +2181,40 @@ class Trellis2FBXExport:
                     _bimg = PILImage.open(albedo_png).convert('RGB'); _S = _bimg.size
                     _amask = _npc.array(PILImage.open(_g_alpha).convert('L').resize(_S))
                     _msk = (_amask > 10).astype(_npc.uint8)
-                    _it  = max(8, int(_S[0] / 2048 * 16)); _rad = max(10, int(_S[0] / 2048 * 20))
-                    _msk = _cv2.dilate(_msk, _npc.ones((9, 9), _npc.uint8), iterations=_it)
-                    PILImage.fromarray(_cv2.inpaint(_npc.array(_bimg), _msk, _rad, _cv2.INPAINT_TELEA)).save(albedo_png)
+                    # COST + SANITY GUARD. TELEA inpaint is superlinear in radius and mask area; at
+                    # radius 40 over a 4096 atlas it ran ~5 min per map. It is also only meaningful when
+                    # the mask is a LOCAL crotch feather. Measured on a real bake the mask covered 38% of
+                    # the atlas before dilation and 69% after -- a whole-body repaint, not a crotch fill.
+                    _base = float(_msk.mean())
+                    if _base > 0.12:
+                        raise RuntimeError(f"genital alpha covers {_base*100:.0f}% of the atlas -- not a "
+                                           f"local feather; refusing to inpaint the whole body")
+                    # grow only until the mask stops being local (<= 2x its own area), never a fixed count
+                    _it_max = max(8, int(_S[0] / 2048 * 16))
+                    _grown = _msk
+                    for _i in range(_it_max):
+                        _try = _cv2.dilate(_grown, _npc.ones((9, 9), _npc.uint8), iterations=1)
+                        if float(_try.mean()) > 2.0 * _base:
+                            break
+                        _grown = _try
+                    _msk = _grown
+                    _rad = max(6, min(12, int(_S[0] / 2048 * 8)))
+                    # inpaint only the mask's bounding box -- cv2 processes the whole image otherwise
+                    _ys, _xs = _npc.nonzero(_msk)
+                    _m = _rad + 8
+                    _x0, _x1 = max(0, int(_xs.min()) - _m), min(_S[0], int(_xs.max()) + _m)
+                    _y0, _y1 = max(0, int(_ys.min()) - _m), min(_S[1], int(_ys.max()) + _m)
+                    print(f"[FBXExport] crotch inpaint: mask {_base*100:.2f}% -> {_msk.mean()*100:.2f}%, "
+                          f"radius {_rad}, tile {_x1-_x0}x{_y1-_y0} of {_S[0]}x{_S[1]}", flush=True)
+                    def _inp_tile(_pil):
+                        _arr = _npc.array(_pil)
+                        _t = _cv2.inpaint(_arr[_y0:_y1, _x0:_x1].copy(), _msk[_y0:_y1, _x0:_x1],
+                                          _rad, _cv2.INPAINT_TELEA)
+                        _arr[_y0:_y1, _x0:_x1] = _t
+                        return PILImage.fromarray(_arr)
+                    _inp_tile(_bimg).save(albedo_png)
                     if has_mr:
-                        PILImage.fromarray(_cv2.inpaint(_npc.array(PILImage.open(mr_png).convert('RGB')), _msk, _rad, _cv2.INPAINT_TELEA)).save(mr_png)
+                        _inp_tile(PILImage.open(mr_png).convert('RGB')).save(mr_png)
                     print("[FBXExport] Crotch occlusion-fill inpainted from surrounding skin")
                 except Exception as _inp_e:
                     print(f"[FBXExport] Crotch inpaint skipped: {_inp_e}")
