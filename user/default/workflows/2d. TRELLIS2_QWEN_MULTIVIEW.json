@@ -1,8 +1,8 @@
 {
   "id": "trellis2-qwen-mv",
   "revision": 0,
-  "last_node_id": 108,
-  "last_link_id": 181,
+  "last_node_id": 148,
+  "last_link_id": 291,
   "nodes": [
     {
       "id": 2,
@@ -99,7 +99,7 @@
           "type": "TRELLIS2PIPELINE",
           "slot_index": 0,
           "links": [
-            2
+            249
           ]
         }
       ],
@@ -129,7 +129,7 @@
         150
       ],
       "flags": {},
-      "order": 3,
+      "order": 12,
       "mode": 0,
       "inputs": [
         {
@@ -187,209 +187,6 @@
       ]
     },
     {
-      "id": 4,
-      "type": "Trellis2MeshWithVoxelGenerator",
-      "pos": [
-        820,
-        150
-      ],
-      "size": [
-        420,
-        520
-      ],
-      "flags": {},
-      "order": 4,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "pipeline",
-          "name": "pipeline",
-          "type": "TRELLIS2PIPELINE",
-          "link": 2
-        },
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 97
-        },
-        {
-          "localized_name": "seed",
-          "name": "seed",
-          "type": "INT",
-          "widget": {
-            "name": "seed"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "pipeline_type",
-          "name": "pipeline_type",
-          "type": "COMBO",
-          "widget": {
-            "name": "pipeline_type"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "sparse_structure_steps",
-          "name": "sparse_structure_steps",
-          "type": "INT",
-          "widget": {
-            "name": "sparse_structure_steps"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "shape_steps",
-          "name": "shape_steps",
-          "type": "INT",
-          "widget": {
-            "name": "shape_steps"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "texture_steps",
-          "name": "texture_steps",
-          "type": "INT",
-          "widget": {
-            "name": "texture_steps"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "max_num_tokens",
-          "name": "max_num_tokens",
-          "type": "INT",
-          "widget": {
-            "name": "max_num_tokens"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "max_views",
-          "name": "max_views",
-          "type": "INT",
-          "widget": {
-            "name": "max_views"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "sparse_structure_resolution",
-          "name": "sparse_structure_resolution",
-          "type": "INT",
-          "widget": {
-            "name": "sparse_structure_resolution"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "generate_texture_slat",
-          "name": "generate_texture_slat",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "generate_texture_slat"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "use_tiled_decoder",
-          "name": "use_tiled_decoder",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "use_tiled_decoder"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "sampler",
-          "name": "sampler",
-          "type": "COMBO",
-          "widget": {
-            "name": "sampler"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "fill_holes",
-          "name": "fill_holes",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "fill_holes"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "hole_iterations",
-          "name": "hole_iterations",
-          "type": "INT",
-          "widget": {
-            "name": "hole_iterations"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "hole_fill_algorithm",
-          "name": "hole_fill_algorithm",
-          "type": "COMBO",
-          "widget": {
-            "name": "hole_fill_algorithm"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "keep_only_shell",
-          "name": "keep_only_shell",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "keep_only_shell"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "mesh",
-          "name": "mesh",
-          "type": "MESHWITHVOXEL",
-          "slot_index": 0,
-          "links": [
-            89
-          ]
-        },
-        {
-          "localized_name": "bvh",
-          "name": "bvh",
-          "type": "BVH",
-          "slot_index": 1,
-          "links": []
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Trellis2MeshWithVoxelGenerator"
-      },
-      "widgets_values": [
-        0,
-        "fixed",
-        "1024_cascade",
-        12,
-        12,
-        12,
-        49152,
-        4,
-        32,
-        true,
-        true,
-        "euler",
-        true,
-        1,
-        "flood_fill",
-        true
-      ]
-    },
-    {
       "id": 16,
       "type": "Trellis2Remesh",
       "pos": [
@@ -401,7 +198,7 @@
         180
       ],
       "flags": {},
-      "order": 6,
+      "order": 54,
       "mode": 0,
       "inputs": [
         {
@@ -463,7 +260,7 @@
           "type": "MESHWITHVOXEL",
           "slot_index": 0,
           "links": [
-            26
+            245
           ]
         }
       ],
@@ -490,14 +287,14 @@
         80
       ],
       "flags": {},
-      "order": 7,
+      "order": 59,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "mesh",
           "name": "mesh",
           "type": "MESHWITHVOXEL",
-          "link": 94
+          "link": 247
         },
         {
           "localized_name": "reorient_vertices",
@@ -528,203 +325,6 @@
       ]
     },
     {
-      "id": 11,
-      "type": "SaveImage",
-      "pos": [
-        3030,
-        430
-      ],
-      "size": [
-        330,
-        270
-      ],
-      "flags": {},
-      "order": 12,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": 16
-        },
-        {
-          "localized_name": "filename_prefix",
-          "name": "filename_prefix",
-          "type": "STRING",
-          "widget": {
-            "name": "filename_prefix"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "3D/char_basecolor"
-      ]
-    },
-    {
-      "id": 12,
-      "type": "SaveImage",
-      "pos": [
-        3030,
-        540
-      ],
-      "size": [
-        330,
-        270
-      ],
-      "flags": {},
-      "order": 13,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": 17
-        },
-        {
-          "localized_name": "filename_prefix",
-          "name": "filename_prefix",
-          "type": "STRING",
-          "widget": {
-            "name": "filename_prefix"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "3D/char_MR"
-      ]
-    },
-    {
-      "id": 13,
-      "type": "SaveImage",
-      "pos": [
-        3030,
-        650
-      ],
-      "size": [
-        330,
-        270
-      ],
-      "flags": {},
-      "order": 14,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": 18
-        },
-        {
-          "localized_name": "filename_prefix",
-          "name": "filename_prefix",
-          "type": "STRING",
-          "widget": {
-            "name": "filename_prefix"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "3D/char_normal"
-      ]
-    },
-    {
-      "id": 46,
-      "type": "SaveImage",
-      "pos": [
-        3545.0788513688017,
-        235.6599262332134
-      ],
-      "size": [
-        330,
-        270
-      ],
-      "flags": {},
-      "order": 18,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": 83
-        },
-        {
-          "localized_name": "filename_prefix",
-          "name": "filename_prefix",
-          "type": "STRING",
-          "widget": {
-            "name": "filename_prefix"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [],
-      "title": "Eye texture Ã¢â‚¬â€ left",
-      "properties": {
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "3D/char_eye_left"
-      ]
-    },
-    {
-      "id": 47,
-      "type": "SaveImage",
-      "pos": [
-        3543.0752840909076,
-        541.0017836389459
-      ],
-      "size": [
-        330,
-        270
-      ],
-      "flags": {},
-      "order": 19,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": 84
-        },
-        {
-          "localized_name": "filename_prefix",
-          "name": "filename_prefix",
-          "type": "STRING",
-          "widget": {
-            "name": "filename_prefix"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [],
-      "title": "Eye texture Ã¢â‚¬â€ right",
-      "properties": {
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "3D/char_eye_right"
-      ]
-    },
-    {
       "id": 15,
       "type": "FlattenLight",
       "pos": [
@@ -736,7 +336,7 @@
         230
       ],
       "flags": {},
-      "order": 5,
+      "order": 16,
       "mode": 0,
       "inputs": [
         {
@@ -807,9 +407,7 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            8,
             82,
-            87,
             104,
             117,
             138,
@@ -841,8 +439,8 @@
         210
       ],
       "flags": {},
-      "order": 9,
-      "mode": 0,
+      "order": 66,
+      "mode": 2,
       "inputs": [
         {
           "localized_name": "trimesh",
@@ -906,7 +504,6 @@
           "link": null
         },
         {
-          "localized_name": "front_image",
           "name": "front_image",
           "shape": 7,
           "type": "IMAGE",
@@ -919,11 +516,7 @@
           "name": "trimesh",
           "type": "TRIMESH",
           "slot_index": 0,
-          "links": [
-            32,
-            86,
-            90
-          ]
+          "links": []
         },
         {
           "localized_name": "obj_path",
@@ -932,7 +525,7 @@
           "slot_index": 1,
           "links": [
             51,
-            174
+            220
           ]
         }
       ],
@@ -949,218 +542,6 @@
       ]
     },
     {
-      "id": 48,
-      "type": "Trellis2FaceAlignPreview",
-      "pos": [
-        2506,
-        1120
-      ],
-      "size": [
-        340,
-        222
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "trimesh",
-          "name": "trimesh",
-          "type": "TRIMESH",
-          "link": 86
-        },
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 87
-        },
-        {
-          "localized_name": "azimuth",
-          "name": "azimuth",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "azimuth"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "elevation",
-          "name": "elevation",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "elevation"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "ortho_scale",
-          "name": "ortho_scale",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "ortho_scale"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "norm_size",
-          "name": "norm_size",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "norm_size"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "blend",
-          "name": "blend",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "blend"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "show_mesh_edges",
-          "name": "show_mesh_edges",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "show_mesh_edges"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "show_source_edges",
-          "name": "show_source_edges",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "show_source_edges"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "preview",
-          "name": "preview",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            88
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Trellis2FaceAlignPreview"
-      },
-      "widgets_values": [
-        0,
-        0,
-        1.15,
-        1.15,
-        0,
-        true,
-        true
-      ]
-    },
-    {
-      "id": 49,
-      "type": "PreviewImage",
-      "pos": [
-        2880,
-        1120
-      ],
-      "size": [
-        380,
-        380
-      ],
-      "flags": {},
-      "order": 16,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": 88
-        }
-      ],
-      "outputs": [],
-      "title": "Face Align Preview (fast, KAN-9)",
-      "properties": {
-        "Node name for S&R": "PreviewImage"
-      },
-      "widgets_values": []
-    },
-    {
-      "id": 1,
-      "type": "LoadImage",
-      "pos": [
-        50,
-        380
-      ],
-      "size": [
-        315,
-        314
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "COMBO",
-          "widget": {
-            "name": "image"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "choose file to upload",
-          "name": "upload",
-          "type": "IMAGEUPLOAD",
-          "widget": {
-            "name": "upload"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            1,
-            96
-          ]
-        },
-        {
-          "localized_name": "MASK",
-          "name": "MASK",
-          "type": "MASK",
-          "slot_index": 1,
-          "links": []
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "character_posed_00197_.png",
-        "image"
-      ]
-    },
-    {
       "id": 50,
       "type": "ReplaceHandsWithDonor",
       "pos": [
@@ -1172,7 +553,7 @@
         82
       ],
       "flags": {},
-      "order": 8,
+      "order": 62,
       "mode": 0,
       "inputs": [
         {
@@ -1209,7 +590,8 @@
           "type": "TRIMESH",
           "slot_index": 0,
           "links": [
-            4
+            4,
+            90
           ]
         }
       ],
@@ -1233,29 +615,29 @@
         250
       ],
       "flags": {},
-      "order": 15,
-      "mode": 0,
+      "order": 69,
+      "mode": 2,
       "inputs": [
         {
           "localized_name": "base_color",
           "name": "base_color",
           "shape": 7,
           "type": "IMAGE",
-          "link": 48
+          "link": 223
         },
         {
           "localized_name": "metallic_roughness",
           "name": "metallic_roughness",
           "shape": 7,
           "type": "IMAGE",
-          "link": 49
+          "link": 225
         },
         {
           "localized_name": "normal_map",
           "name": "normal_map",
           "shape": 7,
           "type": "IMAGE",
-          "link": 50
+          "link": null
         },
         {
           "localized_name": "front_image",
@@ -1309,27 +691,21 @@
           "name": "fbx_path",
           "type": "STRING",
           "slot_index": 0,
-          "links": [
-            92
-          ]
+          "links": []
         },
         {
           "localized_name": "eye_texture_left",
           "name": "eye_texture_left",
           "type": "IMAGE",
           "slot_index": 1,
-          "links": [
-            83
-          ]
+          "links": []
         },
         {
           "localized_name": "eye_texture_right",
           "name": "eye_texture_right",
           "type": "IMAGE",
           "slot_index": 2,
-          "links": [
-            84
-          ]
+          "links": []
         }
       ],
       "properties": {
@@ -1354,7 +730,7 @@
         174
       ],
       "flags": {},
-      "order": 17,
+      "order": 70,
       "mode": 0,
       "inputs": [
         {
@@ -1417,7 +793,7 @@
           "widget": {
             "name": "dest_fbx"
           },
-          "link": 92
+          "link": 291
         }
       ],
       "outputs": [
@@ -1437,7 +813,9 @@
         false,
         true,
         false,
-        ""
+        "",
+        "C:/Unreal Projects/C++/RPG_Unreal 5.5",
+        "/Game/Assets/OwnAssets/ComfyUI"
       ]
     },
     {
@@ -1452,7 +830,7 @@
         82
       ],
       "flags": {},
-      "order": 2,
+      "order": 1,
       "mode": 0,
       "inputs": [
         {
@@ -1496,676 +874,6 @@
       ]
     },
     {
-      "id": 8,
-      "type": "Trellis2MultiViewTexturing",
-      "pos": [
-        2506.842066482162,
-        243.30144187392477
-      ],
-      "size": [
-        460,
-        1418
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "trimesh",
-          "name": "trimesh",
-          "type": "TRIMESH",
-          "link": 32
-        },
-        {
-          "localized_name": "front_image",
-          "name": "front_image",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 8
-        },
-        {
-          "localized_name": "back_image",
-          "name": "back_image",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 152
-        },
-        {
-          "localized_name": "left_image",
-          "name": "left_image",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 131
-        },
-        {
-          "localized_name": "right_image",
-          "name": "right_image",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": 173
-        },
-        {
-          "localized_name": "top_image",
-          "name": "top_image",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "localized_name": "bottom_image",
-          "name": "bottom_image",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "localized_name": "custom_images",
-          "name": "custom_images",
-          "shape": 7,
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "localized_name": "camera_config",
-          "name": "camera_config",
-          "shape": 7,
-          "type": "HY3DCAMERA",
-          "link": null
-        },
-        {
-          "localized_name": "texture_size",
-          "name": "texture_size",
-          "type": "INT",
-          "widget": {
-            "name": "texture_size"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "blend_texture",
-          "name": "blend_texture",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "blend_texture"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "blend_exponent",
-          "name": "blend_exponent",
-          "type": "FLOAT",
-          "widget": {
-            "name": "blend_exponent"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "ortho_scale",
-          "name": "ortho_scale",
-          "type": "FLOAT",
-          "widget": {
-            "name": "ortho_scale"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "norm_size",
-          "name": "norm_size",
-          "type": "FLOAT",
-          "widget": {
-            "name": "norm_size"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "fill_holes",
-          "name": "fill_holes",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "fill_holes"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "max_hole_size",
-          "name": "max_hole_size",
-          "type": "INT",
-          "widget": {
-            "name": "max_hole_size"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "use_metallic",
-          "name": "use_metallic",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "use_metallic"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "depth_eps",
-          "name": "depth_eps",
-          "type": "FLOAT",
-          "widget": {
-            "name": "depth_eps"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "mesh_cluster_threshold_cone_half_angle_rad",
-          "name": "mesh_cluster_threshold_cone_half_angle_rad",
-          "type": "FLOAT",
-          "widget": {
-            "name": "mesh_cluster_threshold_cone_half_angle_rad"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "u_pixel_offset",
-          "name": "u_pixel_offset",
-          "type": "FLOAT",
-          "widget": {
-            "name": "u_pixel_offset"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "v_pixel_offset",
-          "name": "v_pixel_offset",
-          "type": "FLOAT",
-          "widget": {
-            "name": "v_pixel_offset"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "use_cylindrical_uv",
-          "name": "use_cylindrical_uv",
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "use_cylindrical_uv"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "saturation_boost",
-          "name": "saturation_boost",
-          "type": "FLOAT",
-          "widget": {
-            "name": "saturation_boost"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "front_weight",
-          "name": "front_weight",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "front_weight"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "back_weight",
-          "name": "back_weight",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "back_weight"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "left_weight",
-          "name": "left_weight",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "left_weight"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "right_weight",
-          "name": "right_weight",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "right_weight"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "top_weight",
-          "name": "top_weight",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "top_weight"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "bottom_weight",
-          "name": "bottom_weight",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "bottom_weight"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "custom_azimuths",
-          "name": "custom_azimuths",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "custom_azimuths"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "custom_elevations",
-          "name": "custom_elevations",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "custom_elevations"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "custom_weights",
-          "name": "custom_weights",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "custom_weights"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "brightness_correction",
-          "name": "brightness_correction",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "brightness_correction"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "left_azimuth",
-          "name": "left_azimuth",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "left_azimuth"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "back_azimuth",
-          "name": "back_azimuth",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "back_azimuth"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "right_azimuth",
-          "name": "right_azimuth",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "right_azimuth"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "left_blend",
-          "name": "left_blend",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "left_blend"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "back_blend",
-          "name": "back_blend",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "back_blend"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "right_blend",
-          "name": "right_blend",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "right_blend"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "debug_color",
-          "name": "debug_color",
-          "shape": 7,
-          "type": "STRING",
-          "widget": {
-            "name": "debug_color"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "p1b_dark_thresh",
-          "name": "p1b_dark_thresh",
-          "shape": 7,
-          "type": "INT",
-          "widget": {
-            "name": "p1b_dark_thresh"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "p1b_bright_thresh",
-          "name": "p1b_bright_thresh",
-          "shape": 7,
-          "type": "INT",
-          "widget": {
-            "name": "p1b_bright_thresh"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "p1b_sat_thresh",
-          "name": "p1b_sat_thresh",
-          "shape": 7,
-          "type": "INT",
-          "widget": {
-            "name": "p1b_sat_thresh"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "p1b_relative_mode",
-          "name": "p1b_relative_mode",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "p1b_relative_mode"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "p1c_frac",
-          "name": "p1c_frac",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "p1c_frac"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "p1c_diff",
-          "name": "p1c_diff",
-          "shape": 7,
-          "type": "INT",
-          "widget": {
-            "name": "p1c_diff"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "p1b_bright_fraction",
-          "name": "p1b_bright_fraction",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "p1b_bright_fraction"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "debug_regions",
-          "name": "debug_regions",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "debug_regions"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "p1c_k",
-          "name": "p1c_k",
-          "shape": 7,
-          "type": "INT",
-          "widget": {
-            "name": "p1c_k"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "p1c_iterations",
-          "name": "p1c_iterations",
-          "shape": 7,
-          "type": "INT",
-          "widget": {
-            "name": "p1c_iterations"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "neck_y_min",
-          "name": "neck_y_min",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "neck_y_min"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "neck_y_max",
-          "name": "neck_y_max",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "neck_y_max"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "cyan_y_margin",
-          "name": "cyan_y_margin",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "cyan_y_margin"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "cyan_z_frac",
-          "name": "cyan_z_frac",
-          "shape": 7,
-          "type": "FLOAT",
-          "widget": {
-            "name": "cyan_z_frac"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "hair_debug",
-          "name": "hair_debug",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "hair_debug"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "flat_skin",
-          "name": "flat_skin",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "flat_skin"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "face_front_only",
-          "name": "face_front_only",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "face_front_only"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "face_landmark_warp",
-          "name": "face_landmark_warp",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "face_landmark_warp"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "dump_stages",
-          "name": "dump_stages",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "dump_stages"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "fast_skin_fill",
-          "name": "fast_skin_fill",
-          "shape": 7,
-          "type": "BOOLEAN",
-          "widget": {
-            "name": "fast_skin_fill"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "trimesh",
-          "name": "trimesh",
-          "type": "TRIMESH",
-          "slot_index": 0,
-          "links": []
-        },
-        {
-          "localized_name": "base_color",
-          "name": "base_color",
-          "type": "IMAGE",
-          "slot_index": 1,
-          "links": [
-            16,
-            48
-          ]
-        },
-        {
-          "localized_name": "metallic_roughness",
-          "name": "metallic_roughness",
-          "type": "IMAGE",
-          "slot_index": 2,
-          "links": [
-            17,
-            49
-          ]
-        },
-        {
-          "localized_name": "normal_map",
-          "name": "normal_map",
-          "type": "IMAGE",
-          "slot_index": 3,
-          "links": [
-            18,
-            50
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Trellis2MultiViewTexturing"
-      },
-      "widgets_values": [
-        4096,
-        false,
-        1,
-        1.15,
-        1.15,
-        false,
-        99999,
-        true,
-        0.02,
-        60,
-        0,
-        0,
-        false,
-        1.5,
-        1,
-        1,
-        0.4,
-        0.4,
-        0.1,
-        0.1,
-        "",
-        "",
-        "",
-        1,
-        90,
-        180,
-        270,
-        0.25,
-        0.5,
-        0.75,
-        "",
-        150,
-        180,
-        10,
-        false,
-        0.58,
-        128,
-        0.6,
-        false,
-        96,
-        5,
-        0.3,
-        0.42,
-        0.45,
-        0.72,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true
-      ]
-    },
-    {
       "id": 53,
       "type": "Trellis2FillHolesWithCuMesh",
       "pos": [
@@ -2177,14 +885,23 @@
         60
       ],
       "flags": {},
-      "order": 0,
+      "order": 49,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "mesh",
           "name": "mesh",
           "type": "MESHWITHVOXEL",
-          "link": 89
+          "link": 255
+        },
+        {
+          "localized_name": "max_permieters",
+          "name": "max_permieters",
+          "type": "FLOAT",
+          "widget": {
+            "name": "max_permieters"
+          },
+          "link": null
         }
       ],
       "outputs": [
@@ -2194,7 +911,7 @@
           "type": "MESHWITHVOXEL",
           "slot_index": 0,
           "links": [
-            93
+            244
           ]
         }
       ],
@@ -2202,7 +919,7 @@
         "Node name for S&R": "Trellis2FillHolesWithCuMesh"
       },
       "widgets_values": [
-        1.0
+        1
       ]
     },
     {
@@ -2217,14 +934,14 @@
         80
       ],
       "flags": {},
-      "order": 0,
+      "order": 56,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "mesh",
           "name": "mesh",
           "type": "MESHWITHVOXEL",
-          "link": 181
+          "link": 246
         }
       ],
       "outputs": [
@@ -2234,7 +951,7 @@
           "type": "MESHWITHVOXEL",
           "slot_index": 0,
           "links": [
-            94
+            281
           ]
         },
         {
@@ -2261,10 +978,10 @@
       ],
       "size": [
         300,
-        90
+        112
       ],
       "flags": {},
-      "order": 0,
+      "order": 58,
       "mode": 0,
       "inputs": [
         {
@@ -2283,11 +1000,15 @@
           "links": []
         }
       ],
+      "title": "HOLES FILLED (tripwire - expect 0)",
       "properties": {
         "Node name for S&R": "PreviewAny"
       },
-      "widgets_values": [],
-      "title": "HOLES FILLED (tripwire - expect 0)"
+      "widgets_values": [
+        null,
+        null,
+        null
+      ]
     },
     {
       "id": 56,
@@ -2297,11 +1018,11 @@
         700
       ],
       "size": [
-        315,
+        423.792578125,
         150
       ],
       "flags": {},
-      "order": 3,
+      "order": 13,
       "mode": 0,
       "inputs": [
         {
@@ -2309,6 +1030,33 @@
           "name": "image",
           "type": "IMAGE",
           "link": 96
+        },
+        {
+          "localized_name": "padding",
+          "name": "padding",
+          "type": "INT",
+          "widget": {
+            "name": "padding"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "remove_background",
+          "name": "remove_background",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "remove_background"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "max_size",
+          "name": "max_size",
+          "type": "INT",
+          "widget": {
+            "name": "max_size"
+          },
+          "link": null
         }
       ],
       "outputs": [
@@ -2318,10 +1066,11 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            97
+            250
           ]
         }
       ],
+      "title": "PreProcess for GEOMETRY (padding 96 = TRELLIS 1.2x framing)",
       "properties": {
         "Node name for S&R": "Trellis2PreProcessImage"
       },
@@ -2329,8 +1078,7 @@
         96,
         true,
         2048
-      ],
-      "title": "PreProcess for GEOMETRY (padding 96 = TRELLIS 1.2x framing)"
+      ]
     },
     {
       "id": 57,
@@ -2344,14 +1092,14 @@
         60
       ],
       "flags": {},
-      "order": 0,
+      "order": 51,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "input_1",
           "name": "input_1",
           "type": "*",
-          "link": 93
+          "link": 244
         }
       ],
       "outputs": [
@@ -2365,11 +1113,11 @@
           ]
         }
       ],
+      "title": "free VRAM before remesh",
       "properties": {
         "Node name for S&R": "Trellis2UnloadAllModels"
       },
-      "widgets_values": [],
-      "title": "free VRAM before remesh"
+      "widgets_values": []
     },
     {
       "id": 58,
@@ -2383,7 +1131,7 @@
         60
       ],
       "flags": {},
-      "order": 0,
+      "order": 53,
       "mode": 0,
       "inputs": [
         {
@@ -2404,11 +1152,11 @@
           ]
         }
       ],
+      "title": "empty CUDA cache",
       "properties": {
         "Node name for S&R": "Trellis2CudaReset"
       },
-      "widgets_values": [],
-      "title": "empty CUDA cache"
+      "widgets_values": []
     },
     {
       "id": 59,
@@ -2422,13 +1170,16 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 2,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "unet_name",
           "name": "unet_name",
           "type": "COMBO",
+          "widget": {
+            "name": "unet_name"
+          },
           "link": null
         }
       ],
@@ -2462,7 +1213,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 7,
       "mode": 0,
       "inputs": [
         {
@@ -2475,12 +1226,18 @@
           "localized_name": "lora_name",
           "name": "lora_name",
           "type": "COMBO",
+          "widget": {
+            "name": "lora_name"
+          },
           "link": null
         },
         {
           "localized_name": "strength_model",
           "name": "strength_model",
           "type": "FLOAT",
+          "widget": {
+            "name": "strength_model"
+          },
           "link": null
         }
       ],
@@ -2495,14 +1252,14 @@
           ]
         }
       ],
+      "title": "Lightning 4-step",
       "properties": {
         "Node name for S&R": "LoraLoaderModelOnly"
       },
       "widgets_values": [
         "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
-        1.0
-      ],
-      "title": "Lightning 4-step"
+        1
+      ]
     },
     {
       "id": 61,
@@ -2516,7 +1273,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
@@ -2529,12 +1286,18 @@
           "localized_name": "lora_name",
           "name": "lora_name",
           "type": "COMBO",
+          "widget": {
+            "name": "lora_name"
+          },
           "link": null
         },
         {
           "localized_name": "strength_model",
           "name": "strength_model",
           "type": "FLOAT",
+          "widget": {
+            "name": "strength_model"
+          },
           "link": null
         }
       ],
@@ -2549,14 +1312,14 @@
           ]
         }
       ],
+      "title": "Multiple-angles LoRA",
       "properties": {
         "Node name for S&R": "LoraLoaderModelOnly"
       },
       "widgets_values": [
         "qwen-image-edit-2511-multiple-angles-lora.safetensors",
-        1.0
-      ],
-      "title": "Multiple-angles LoRA"
+        1
+      ]
     },
     {
       "id": 62,
@@ -2570,7 +1333,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 15,
       "mode": 0,
       "inputs": [
         {
@@ -2583,6 +1346,9 @@
           "localized_name": "shift",
           "name": "shift",
           "type": "FLOAT",
+          "widget": {
+            "name": "shift"
+          },
           "link": null
         }
       ],
@@ -2616,7 +1382,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 17,
       "mode": 0,
       "inputs": [
         {
@@ -2629,13 +1395,16 @@
           "localized_name": "strength",
           "name": "strength",
           "type": "FLOAT",
+          "widget": {
+            "name": "strength"
+          },
           "link": null
         }
       ],
       "outputs": [
         {
-          "localized_name": "MODEL",
-          "name": "MODEL",
+          "localized_name": "patched_model",
+          "name": "patched_model",
           "type": "MODEL",
           "slot_index": 0,
           "links": [
@@ -2649,7 +1418,7 @@
         "Node name for S&R": "CFGNorm"
       },
       "widgets_values": [
-        1.0
+        1
       ]
     },
     {
@@ -2664,25 +1433,35 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 3,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "clip_name",
           "name": "clip_name",
           "type": "COMBO",
+          "widget": {
+            "name": "clip_name"
+          },
           "link": null
         },
         {
           "localized_name": "type",
           "name": "type",
           "type": "COMBO",
+          "widget": {
+            "name": "type"
+          },
           "link": null
         },
         {
           "localized_name": "device",
           "name": "device",
+          "shape": 7,
           "type": "COMBO",
+          "widget": {
+            "name": "device"
+          },
           "link": null
         }
       ],
@@ -2721,13 +1500,16 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "vae_name",
           "name": "vae_name",
           "type": "COMBO",
+          "widget": {
+            "name": "vae_name"
+          },
           "link": null
         }
       ],
@@ -2740,13 +1522,10 @@
           "links": [
             105,
             107,
-            114,
             116,
             128,
-            135,
             137,
             149,
-            156,
             158,
             170
           ]
@@ -2771,7 +1550,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 18,
       "mode": 0,
       "inputs": [
         {
@@ -2801,11 +1580,11 @@
           ]
         }
       ],
+      "title": "encode FRONT",
       "properties": {
         "Node name for S&R": "VAEEncode"
       },
-      "widgets_values": [],
-      "title": "encode FRONT"
+      "widgets_values": []
     },
     {
       "id": 67,
@@ -2819,25 +1598,34 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "width",
           "name": "width",
           "type": "INT",
+          "widget": {
+            "name": "width"
+          },
           "link": null
         },
         {
           "localized_name": "height",
           "name": "height",
           "type": "INT",
+          "widget": {
+            "name": "height"
+          },
           "link": null
         },
         {
           "localized_name": "batch_size",
           "name": "batch_size",
           "type": "INT",
+          "widget": {
+            "name": "batch_size"
+          },
           "link": null
         }
       ],
@@ -2872,10 +1660,10 @@
       ],
       "size": [
         340,
-        160
+        168
       ],
       "flags": {},
-      "order": 0,
+      "order": 8,
       "mode": 0,
       "inputs": [
         {
@@ -2885,33 +1673,40 @@
           "link": 106
         },
         {
-          "localized_name": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "link": null
-        },
-        {
           "localized_name": "vae",
           "name": "vae",
+          "shape": 7,
           "type": "VAE",
           "link": 107
         },
         {
           "localized_name": "image1",
           "name": "image1",
+          "shape": 7,
           "type": "IMAGE",
           "link": null
         },
         {
           "localized_name": "image2",
           "name": "image2",
+          "shape": 7,
           "type": "IMAGE",
           "link": null
         },
         {
           "localized_name": "image3",
           "name": "image3",
+          "shape": 7,
           "type": "IMAGE",
+          "link": null
+        },
+        {
+          "localized_name": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
           "link": null
         }
       ],
@@ -2926,13 +1721,13 @@
           ]
         }
       ],
+      "title": "negative (empty)",
       "properties": {
         "Node name for S&R": "TextEncodeQwenImageEditPlus"
       },
       "widgets_values": [
         ""
-      ],
-      "title": "negative (empty)"
+      ]
     },
     {
       "id": 69,
@@ -2946,7 +1741,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
@@ -2959,6 +1754,9 @@
           "localized_name": "reference_latents_method",
           "name": "reference_latents_method",
           "type": "COMBO",
+          "widget": {
+            "name": "reference_latents_method"
+          },
           "link": null
         }
       ],
@@ -2992,7 +1790,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 22,
       "mode": 0,
       "inputs": [
         {
@@ -3004,6 +1802,7 @@
         {
           "localized_name": "latent",
           "name": "latent",
+          "shape": 7,
           "type": "LATENT",
           "link": 110
         }
@@ -3027,105 +1826,6 @@
       "widgets_values": []
     },
     {
-      "id": 72,
-      "type": "Canny",
-      "pos": [
-        820,
-        1700
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 176
-        },
-        {
-          "localized_name": "low_threshold",
-          "name": "low_threshold",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "high_threshold",
-          "name": "high_threshold",
-          "type": "FLOAT",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            113
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Canny"
-      },
-      "widgets_values": [
-        0.01,
-        0.2
-      ],
-      "title": "LEFT edges"
-    },
-    {
-      "id": 73,
-      "type": "VAEEncode",
-      "pos": [
-        820,
-        1830
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "pixels",
-          "name": "pixels",
-          "type": "IMAGE",
-          "link": 113
-        },
-        {
-          "localized_name": "vae",
-          "name": "vae",
-          "type": "VAE",
-          "link": 114
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "LATENT",
-          "name": "LATENT",
-          "type": "LATENT",
-          "slot_index": 0,
-          "links": [
-            122
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VAEEncode"
-      },
-      "widgets_values": [],
-      "title": "LEFT canny latent"
-    },
-    {
       "id": 74,
       "type": "TextEncodeQwenImageEditPlus",
       "pos": [
@@ -3133,11 +1833,11 @@
         1950
       ],
       "size": [
-        340,
+        349.5884765625,
         190
       ],
       "flags": {},
-      "order": 0,
+      "order": 19,
       "mode": 0,
       "inputs": [
         {
@@ -3147,34 +1847,41 @@
           "link": 115
         },
         {
-          "localized_name": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "link": null
-        },
-        {
           "localized_name": "vae",
           "name": "vae",
+          "shape": 7,
           "type": "VAE",
           "link": 116
         },
         {
           "localized_name": "image1",
           "name": "image1",
+          "shape": 7,
           "type": "IMAGE",
           "link": 117
         },
         {
           "localized_name": "image2",
           "name": "image2",
+          "shape": 7,
           "type": "IMAGE",
           "link": null
         },
         {
           "localized_name": "image3",
           "name": "image3",
+          "shape": 7,
           "type": "IMAGE",
           "link": null
+        },
+        {
+          "localized_name": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 288
         }
       ],
       "outputs": [
@@ -3188,13 +1895,13 @@
           ]
         }
       ],
+      "title": "LEFT view (prompt comes from the image's CSV row)",
       "properties": {
         "Node name for S&R": "TextEncodeQwenImageEditPlus"
       },
       "widgets_values": [
-        "<sks> left side view eye-level shot medium shot"
-      ],
-      "title": "LEFT prompt"
+        ""
+      ]
     },
     {
       "id": 75,
@@ -3208,7 +1915,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 23,
       "mode": 0,
       "inputs": [
         {
@@ -3221,6 +1928,9 @@
           "localized_name": "reference_latents_method",
           "name": "reference_latents_method",
           "type": "COMBO",
+          "widget": {
+            "name": "reference_latents_method"
+          },
           "link": null
         }
       ],
@@ -3254,7 +1964,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 26,
       "mode": 0,
       "inputs": [
         {
@@ -3266,53 +1976,9 @@
         {
           "localized_name": "latent",
           "name": "latent",
+          "shape": 7,
           "type": "LATENT",
           "link": 120
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CONDITIONING",
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "slot_index": 0,
-          "links": [
-            121
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ReferenceLatent"
-      },
-      "widgets_values": [],
-      "title": "LEFT ref: front"
-    },
-    {
-      "id": 77,
-      "type": "ReferenceLatent",
-      "pos": [
-        820,
-        2400
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "conditioning",
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 121
-        },
-        {
-          "localized_name": "latent",
-          "name": "latent",
-          "type": "LATENT",
-          "link": 122
         }
       ],
       "outputs": [
@@ -3326,11 +1992,11 @@
           ]
         }
       ],
+      "title": "LEFT ref: front",
       "properties": {
         "Node name for S&R": "ReferenceLatent"
       },
-      "widgets_values": [],
-      "title": "LEFT ref: mesh edges"
+      "widgets_values": []
     },
     {
       "id": 78,
@@ -3341,10 +2007,10 @@
       ],
       "size": [
         320,
-        250
+        262
       ],
       "flags": {},
-      "order": 0,
+      "order": 29,
       "mode": 0,
       "inputs": [
         {
@@ -3375,36 +2041,54 @@
           "localized_name": "seed",
           "name": "seed",
           "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
           "link": null
         },
         {
           "localized_name": "steps",
           "name": "steps",
           "type": "INT",
+          "widget": {
+            "name": "steps"
+          },
           "link": null
         },
         {
           "localized_name": "cfg",
           "name": "cfg",
           "type": "FLOAT",
+          "widget": {
+            "name": "cfg"
+          },
           "link": null
         },
         {
           "localized_name": "sampler_name",
           "name": "sampler_name",
           "type": "COMBO",
+          "widget": {
+            "name": "sampler_name"
+          },
           "link": null
         },
         {
           "localized_name": "scheduler",
           "name": "scheduler",
           "type": "COMBO",
+          "widget": {
+            "name": "scheduler"
+          },
           "link": null
         },
         {
           "localized_name": "denoise",
           "name": "denoise",
           "type": "FLOAT",
+          "widget": {
+            "name": "denoise"
+          },
           "link": null
         }
       ],
@@ -3419,6 +2103,7 @@
           ]
         }
       ],
+      "title": "LEFT sample",
       "properties": {
         "Node name for S&R": "KSampler"
       },
@@ -3426,12 +2111,11 @@
         1000,
         "fixed",
         4,
-        1.0,
+        1,
         "euler",
         "simple",
-        1.0
-      ],
-      "title": "LEFT sample"
+        1
+      ]
     },
     {
       "id": 79,
@@ -3442,10 +2126,10 @@
       ],
       "size": [
         340,
-        120
+        150
       ],
       "flags": {},
-      "order": 0,
+      "order": 32,
       "mode": 0,
       "inputs": [
         {
@@ -3464,24 +2148,36 @@
           "localized_name": "tile_size",
           "name": "tile_size",
           "type": "INT",
+          "widget": {
+            "name": "tile_size"
+          },
           "link": null
         },
         {
           "localized_name": "overlap",
           "name": "overlap",
           "type": "INT",
+          "widget": {
+            "name": "overlap"
+          },
           "link": null
         },
         {
           "localized_name": "temporal_size",
           "name": "temporal_size",
           "type": "INT",
+          "widget": {
+            "name": "temporal_size"
+          },
           "link": null
         },
         {
           "localized_name": "temporal_overlap",
           "name": "temporal_overlap",
           "type": "INT",
+          "widget": {
+            "name": "temporal_overlap"
+          },
           "link": null
         }
       ],
@@ -3515,70 +2211,105 @@
       ],
       "size": [
         330,
-        240
+        292
       ],
       "flags": {},
-      "order": 0,
+      "order": 38,
       "mode": 0,
       "inputs": [
         {
-          "localized_name": "image",
+          "localized_name": "Image",
           "name": "image",
           "type": "IMAGE",
-          "link": 129
+          "link": 185
         },
         {
-          "localized_name": "model",
+          "localized_name": "Model",
           "name": "model",
           "type": "COMBO",
+          "widget": {
+            "name": "model"
+          },
           "link": null
         },
         {
-          "localized_name": "sensitivity",
+          "localized_name": "Sensitivity",
           "name": "sensitivity",
+          "shape": 7,
           "type": "FLOAT",
+          "widget": {
+            "name": "sensitivity"
+          },
           "link": null
         },
         {
-          "localized_name": "process_res",
+          "localized_name": "Processing Resolution",
           "name": "process_res",
+          "shape": 7,
           "type": "INT",
+          "widget": {
+            "name": "process_res"
+          },
           "link": null
         },
         {
-          "localized_name": "mask_blur",
+          "localized_name": "Mask Blur",
           "name": "mask_blur",
+          "shape": 7,
           "type": "INT",
+          "widget": {
+            "name": "mask_blur"
+          },
           "link": null
         },
         {
-          "localized_name": "mask_offset",
+          "localized_name": "Mask Offset",
           "name": "mask_offset",
+          "shape": 7,
           "type": "INT",
+          "widget": {
+            "name": "mask_offset"
+          },
           "link": null
         },
         {
-          "localized_name": "invert_output",
+          "localized_name": "Invert Output",
           "name": "invert_output",
+          "shape": 7,
           "type": "BOOLEAN",
+          "widget": {
+            "name": "invert_output"
+          },
           "link": null
         },
         {
-          "localized_name": "refine_foreground",
+          "localized_name": "Refine Foreground",
           "name": "refine_foreground",
+          "shape": 7,
           "type": "BOOLEAN",
+          "widget": {
+            "name": "refine_foreground"
+          },
           "link": null
         },
         {
-          "localized_name": "background",
+          "localized_name": "Background",
           "name": "background",
+          "shape": 7,
           "type": "COMBO",
+          "widget": {
+            "name": "background"
+          },
           "link": null
         },
         {
-          "localized_name": "background_color",
+          "localized_name": "Background Color",
           "name": "background_color",
+          "shape": 7,
           "type": "COLORCODE",
+          "widget": {
+            "name": "background_color"
+          },
           "link": null
         }
       ],
@@ -3589,8 +2320,7 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            130,
-            131
+            269
           ]
         },
         {
@@ -3601,19 +2331,20 @@
           "links": []
         },
         {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
+          "localized_name": "MASK IMAGE",
+          "name": "MASK_IMAGE",
           "type": "IMAGE",
           "slot_index": 2,
           "links": []
         }
       ],
+      "title": "LEFT bg->black",
       "properties": {
         "Node name for S&R": "RMBG"
       },
       "widgets_values": [
         "RMBG-2.0",
-        1.0,
+        1,
         1024,
         0,
         0,
@@ -3622,137 +2353,8 @@
         "Color",
         "#000000"
       ],
-      "title": "LEFT bg->black"
-    },
-    {
-      "id": 81,
-      "type": "SaveImage",
-      "pos": [
-        820,
-        3180
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": 130
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "3D/QWEN_LEFT"
-      ],
-      "title": "OUT LEFT"
-    },
-    {
-      "id": 83,
-      "type": "Canny",
-      "pos": [
-        1240,
-        1700
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 178
-        },
-        {
-          "localized_name": "low_threshold",
-          "name": "low_threshold",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "high_threshold",
-          "name": "high_threshold",
-          "type": "FLOAT",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            134
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Canny"
-      },
-      "widgets_values": [
-        0.01,
-        0.2
-      ],
-      "title": "BACK edges"
-    },
-    {
-      "id": 84,
-      "type": "VAEEncode",
-      "pos": [
-        1240,
-        1830
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "pixels",
-          "name": "pixels",
-          "type": "IMAGE",
-          "link": 134
-        },
-        {
-          "localized_name": "vae",
-          "name": "vae",
-          "type": "VAE",
-          "link": 135
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "LATENT",
-          "name": "LATENT",
-          "type": "LATENT",
-          "slot_index": 0,
-          "links": [
-            143
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VAEEncode"
-      },
-      "widgets_values": [],
-      "title": "BACK canny latent"
+      "color": "#222e40",
+      "bgcolor": "#364254"
     },
     {
       "id": 85,
@@ -3762,11 +2364,11 @@
         1950
       ],
       "size": [
-        340,
+        355.0435546875,
         190
       ],
       "flags": {},
-      "order": 0,
+      "order": 20,
       "mode": 0,
       "inputs": [
         {
@@ -3776,34 +2378,41 @@
           "link": 136
         },
         {
-          "localized_name": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "link": null
-        },
-        {
           "localized_name": "vae",
           "name": "vae",
+          "shape": 7,
           "type": "VAE",
           "link": 137
         },
         {
           "localized_name": "image1",
           "name": "image1",
+          "shape": 7,
           "type": "IMAGE",
           "link": 138
         },
         {
           "localized_name": "image2",
           "name": "image2",
+          "shape": 7,
           "type": "IMAGE",
           "link": null
         },
         {
           "localized_name": "image3",
           "name": "image3",
+          "shape": 7,
           "type": "IMAGE",
           "link": null
+        },
+        {
+          "localized_name": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 289
         }
       ],
       "outputs": [
@@ -3817,13 +2426,13 @@
           ]
         }
       ],
+      "title": "BACK view (prompt comes from the image's CSV row)",
       "properties": {
         "Node name for S&R": "TextEncodeQwenImageEditPlus"
       },
       "widgets_values": [
-        "<sks> back view eye-level shot medium shot"
-      ],
-      "title": "BACK prompt"
+        ""
+      ]
     },
     {
       "id": 86,
@@ -3837,7 +2446,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 24,
       "mode": 0,
       "inputs": [
         {
@@ -3850,6 +2459,9 @@
           "localized_name": "reference_latents_method",
           "name": "reference_latents_method",
           "type": "COMBO",
+          "widget": {
+            "name": "reference_latents_method"
+          },
           "link": null
         }
       ],
@@ -3883,7 +2495,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 27,
       "mode": 0,
       "inputs": [
         {
@@ -3895,53 +2507,9 @@
         {
           "localized_name": "latent",
           "name": "latent",
+          "shape": 7,
           "type": "LATENT",
           "link": 141
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CONDITIONING",
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "slot_index": 0,
-          "links": [
-            142
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ReferenceLatent"
-      },
-      "widgets_values": [],
-      "title": "BACK ref: front"
-    },
-    {
-      "id": 88,
-      "type": "ReferenceLatent",
-      "pos": [
-        1240,
-        2400
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "conditioning",
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 142
-        },
-        {
-          "localized_name": "latent",
-          "name": "latent",
-          "type": "LATENT",
-          "link": 143
         }
       ],
       "outputs": [
@@ -3955,11 +2523,11 @@
           ]
         }
       ],
+      "title": "BACK ref: front",
       "properties": {
         "Node name for S&R": "ReferenceLatent"
       },
-      "widgets_values": [],
-      "title": "BACK ref: mesh edges"
+      "widgets_values": []
     },
     {
       "id": 89,
@@ -3970,10 +2538,10 @@
       ],
       "size": [
         320,
-        250
+        262
       ],
       "flags": {},
-      "order": 0,
+      "order": 30,
       "mode": 0,
       "inputs": [
         {
@@ -4004,36 +2572,54 @@
           "localized_name": "seed",
           "name": "seed",
           "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
           "link": null
         },
         {
           "localized_name": "steps",
           "name": "steps",
           "type": "INT",
+          "widget": {
+            "name": "steps"
+          },
           "link": null
         },
         {
           "localized_name": "cfg",
           "name": "cfg",
           "type": "FLOAT",
+          "widget": {
+            "name": "cfg"
+          },
           "link": null
         },
         {
           "localized_name": "sampler_name",
           "name": "sampler_name",
           "type": "COMBO",
+          "widget": {
+            "name": "sampler_name"
+          },
           "link": null
         },
         {
           "localized_name": "scheduler",
           "name": "scheduler",
           "type": "COMBO",
+          "widget": {
+            "name": "scheduler"
+          },
           "link": null
         },
         {
           "localized_name": "denoise",
           "name": "denoise",
           "type": "FLOAT",
+          "widget": {
+            "name": "denoise"
+          },
           "link": null
         }
       ],
@@ -4048,6 +2634,7 @@
           ]
         }
       ],
+      "title": "BACK sample",
       "properties": {
         "Node name for S&R": "KSampler"
       },
@@ -4055,12 +2642,11 @@
         3000,
         "fixed",
         4,
-        1.0,
+        1,
         "euler",
         "simple",
-        1.0
-      ],
-      "title": "BACK sample"
+        1
+      ]
     },
     {
       "id": 90,
@@ -4071,10 +2657,10 @@
       ],
       "size": [
         340,
-        120
+        150
       ],
       "flags": {},
-      "order": 0,
+      "order": 33,
       "mode": 0,
       "inputs": [
         {
@@ -4093,24 +2679,36 @@
           "localized_name": "tile_size",
           "name": "tile_size",
           "type": "INT",
+          "widget": {
+            "name": "tile_size"
+          },
           "link": null
         },
         {
           "localized_name": "overlap",
           "name": "overlap",
           "type": "INT",
+          "widget": {
+            "name": "overlap"
+          },
           "link": null
         },
         {
           "localized_name": "temporal_size",
           "name": "temporal_size",
           "type": "INT",
+          "widget": {
+            "name": "temporal_size"
+          },
           "link": null
         },
         {
           "localized_name": "temporal_overlap",
           "name": "temporal_overlap",
           "type": "INT",
+          "widget": {
+            "name": "temporal_overlap"
+          },
           "link": null
         }
       ],
@@ -4144,70 +2742,105 @@
       ],
       "size": [
         330,
-        240
+        292
       ],
       "flags": {},
-      "order": 0,
+      "order": 39,
       "mode": 0,
       "inputs": [
         {
-          "localized_name": "image",
+          "localized_name": "Image",
           "name": "image",
           "type": "IMAGE",
-          "link": 150
+          "link": 184
         },
         {
-          "localized_name": "model",
+          "localized_name": "Model",
           "name": "model",
           "type": "COMBO",
+          "widget": {
+            "name": "model"
+          },
           "link": null
         },
         {
-          "localized_name": "sensitivity",
+          "localized_name": "Sensitivity",
           "name": "sensitivity",
+          "shape": 7,
           "type": "FLOAT",
+          "widget": {
+            "name": "sensitivity"
+          },
           "link": null
         },
         {
-          "localized_name": "process_res",
+          "localized_name": "Processing Resolution",
           "name": "process_res",
+          "shape": 7,
           "type": "INT",
+          "widget": {
+            "name": "process_res"
+          },
           "link": null
         },
         {
-          "localized_name": "mask_blur",
+          "localized_name": "Mask Blur",
           "name": "mask_blur",
+          "shape": 7,
           "type": "INT",
+          "widget": {
+            "name": "mask_blur"
+          },
           "link": null
         },
         {
-          "localized_name": "mask_offset",
+          "localized_name": "Mask Offset",
           "name": "mask_offset",
+          "shape": 7,
           "type": "INT",
+          "widget": {
+            "name": "mask_offset"
+          },
           "link": null
         },
         {
-          "localized_name": "invert_output",
+          "localized_name": "Invert Output",
           "name": "invert_output",
+          "shape": 7,
           "type": "BOOLEAN",
+          "widget": {
+            "name": "invert_output"
+          },
           "link": null
         },
         {
-          "localized_name": "refine_foreground",
+          "localized_name": "Refine Foreground",
           "name": "refine_foreground",
+          "shape": 7,
           "type": "BOOLEAN",
+          "widget": {
+            "name": "refine_foreground"
+          },
           "link": null
         },
         {
-          "localized_name": "background",
+          "localized_name": "Background",
           "name": "background",
+          "shape": 7,
           "type": "COMBO",
+          "widget": {
+            "name": "background"
+          },
           "link": null
         },
         {
-          "localized_name": "background_color",
+          "localized_name": "Background Color",
           "name": "background_color",
+          "shape": 7,
           "type": "COLORCODE",
+          "widget": {
+            "name": "background_color"
+          },
           "link": null
         }
       ],
@@ -4218,8 +2851,7 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            151,
-            152
+            267
           ]
         },
         {
@@ -4230,19 +2862,20 @@
           "links": []
         },
         {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
+          "localized_name": "MASK IMAGE",
+          "name": "MASK_IMAGE",
           "type": "IMAGE",
           "slot_index": 2,
           "links": []
         }
       ],
+      "title": "BACK bg->black",
       "properties": {
         "Node name for S&R": "RMBG"
       },
       "widgets_values": [
         "RMBG-2.0",
-        1.0,
+        1,
         1024,
         0,
         0,
@@ -4251,137 +2884,8 @@
         "Color",
         "#000000"
       ],
-      "title": "BACK bg->black"
-    },
-    {
-      "id": 92,
-      "type": "SaveImage",
-      "pos": [
-        1240,
-        3180
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": 151
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "3D/QWEN_BACK"
-      ],
-      "title": "OUT BACK"
-    },
-    {
-      "id": 94,
-      "type": "Canny",
-      "pos": [
-        1660,
-        1700
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 180
-        },
-        {
-          "localized_name": "low_threshold",
-          "name": "low_threshold",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "high_threshold",
-          "name": "high_threshold",
-          "type": "FLOAT",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            155
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Canny"
-      },
-      "widgets_values": [
-        0.01,
-        0.2
-      ],
-      "title": "RIGHT edges"
-    },
-    {
-      "id": 95,
-      "type": "VAEEncode",
-      "pos": [
-        1660,
-        1830
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "pixels",
-          "name": "pixels",
-          "type": "IMAGE",
-          "link": 155
-        },
-        {
-          "localized_name": "vae",
-          "name": "vae",
-          "type": "VAE",
-          "link": 156
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "LATENT",
-          "name": "LATENT",
-          "type": "LATENT",
-          "slot_index": 0,
-          "links": [
-            164
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VAEEncode"
-      },
-      "widgets_values": [],
-      "title": "RIGHT canny latent"
+      "color": "#222e40",
+      "bgcolor": "#364254"
     },
     {
       "id": 96,
@@ -4391,11 +2895,11 @@
         1950
       ],
       "size": [
-        340,
+        358.91953125,
         190
       ],
       "flags": {},
-      "order": 0,
+      "order": 21,
       "mode": 0,
       "inputs": [
         {
@@ -4405,34 +2909,41 @@
           "link": 157
         },
         {
-          "localized_name": "prompt",
-          "name": "prompt",
-          "type": "STRING",
-          "link": null
-        },
-        {
           "localized_name": "vae",
           "name": "vae",
+          "shape": 7,
           "type": "VAE",
           "link": 158
         },
         {
           "localized_name": "image1",
           "name": "image1",
+          "shape": 7,
           "type": "IMAGE",
           "link": 159
         },
         {
           "localized_name": "image2",
           "name": "image2",
+          "shape": 7,
           "type": "IMAGE",
           "link": null
         },
         {
           "localized_name": "image3",
           "name": "image3",
+          "shape": 7,
           "type": "IMAGE",
           "link": null
+        },
+        {
+          "localized_name": "prompt",
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 290
         }
       ],
       "outputs": [
@@ -4446,13 +2957,13 @@
           ]
         }
       ],
+      "title": "RIGHT view (prompt comes from the image's CSV row)",
       "properties": {
         "Node name for S&R": "TextEncodeQwenImageEditPlus"
       },
       "widgets_values": [
-        "<sks> right side view eye-level shot medium shot"
-      ],
-      "title": "RIGHT prompt"
+        ""
+      ]
     },
     {
       "id": 97,
@@ -4466,7 +2977,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 25,
       "mode": 0,
       "inputs": [
         {
@@ -4479,6 +2990,9 @@
           "localized_name": "reference_latents_method",
           "name": "reference_latents_method",
           "type": "COMBO",
+          "widget": {
+            "name": "reference_latents_method"
+          },
           "link": null
         }
       ],
@@ -4512,7 +3026,7 @@
         120
       ],
       "flags": {},
-      "order": 0,
+      "order": 28,
       "mode": 0,
       "inputs": [
         {
@@ -4524,53 +3038,9 @@
         {
           "localized_name": "latent",
           "name": "latent",
+          "shape": 7,
           "type": "LATENT",
           "link": 162
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CONDITIONING",
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "slot_index": 0,
-          "links": [
-            163
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ReferenceLatent"
-      },
-      "widgets_values": [],
-      "title": "RIGHT ref: front"
-    },
-    {
-      "id": 99,
-      "type": "ReferenceLatent",
-      "pos": [
-        1660,
-        2400
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "conditioning",
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 163
-        },
-        {
-          "localized_name": "latent",
-          "name": "latent",
-          "type": "LATENT",
-          "link": 164
         }
       ],
       "outputs": [
@@ -4584,11 +3054,11 @@
           ]
         }
       ],
+      "title": "RIGHT ref: front",
       "properties": {
         "Node name for S&R": "ReferenceLatent"
       },
-      "widgets_values": [],
-      "title": "RIGHT ref: mesh edges"
+      "widgets_values": []
     },
     {
       "id": 100,
@@ -4599,10 +3069,10 @@
       ],
       "size": [
         320,
-        250
+        262
       ],
       "flags": {},
-      "order": 0,
+      "order": 31,
       "mode": 0,
       "inputs": [
         {
@@ -4633,36 +3103,54 @@
           "localized_name": "seed",
           "name": "seed",
           "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
           "link": null
         },
         {
           "localized_name": "steps",
           "name": "steps",
           "type": "INT",
+          "widget": {
+            "name": "steps"
+          },
           "link": null
         },
         {
           "localized_name": "cfg",
           "name": "cfg",
           "type": "FLOAT",
+          "widget": {
+            "name": "cfg"
+          },
           "link": null
         },
         {
           "localized_name": "sampler_name",
           "name": "sampler_name",
           "type": "COMBO",
+          "widget": {
+            "name": "sampler_name"
+          },
           "link": null
         },
         {
           "localized_name": "scheduler",
           "name": "scheduler",
           "type": "COMBO",
+          "widget": {
+            "name": "scheduler"
+          },
           "link": null
         },
         {
           "localized_name": "denoise",
           "name": "denoise",
           "type": "FLOAT",
+          "widget": {
+            "name": "denoise"
+          },
           "link": null
         }
       ],
@@ -4677,6 +3165,7 @@
           ]
         }
       ],
+      "title": "RIGHT sample",
       "properties": {
         "Node name for S&R": "KSampler"
       },
@@ -4684,12 +3173,11 @@
         2000,
         "fixed",
         4,
-        1.0,
+        1,
         "euler",
         "simple",
-        1.0
-      ],
-      "title": "RIGHT sample"
+        1
+      ]
     },
     {
       "id": 101,
@@ -4700,10 +3188,10 @@
       ],
       "size": [
         340,
-        120
+        150
       ],
       "flags": {},
-      "order": 0,
+      "order": 34,
       "mode": 0,
       "inputs": [
         {
@@ -4722,24 +3210,36 @@
           "localized_name": "tile_size",
           "name": "tile_size",
           "type": "INT",
+          "widget": {
+            "name": "tile_size"
+          },
           "link": null
         },
         {
           "localized_name": "overlap",
           "name": "overlap",
           "type": "INT",
+          "widget": {
+            "name": "overlap"
+          },
           "link": null
         },
         {
           "localized_name": "temporal_size",
           "name": "temporal_size",
           "type": "INT",
+          "widget": {
+            "name": "temporal_size"
+          },
           "link": null
         },
         {
           "localized_name": "temporal_overlap",
           "name": "temporal_overlap",
           "type": "INT",
+          "widget": {
+            "name": "temporal_overlap"
+          },
           "link": null
         }
       ],
@@ -4773,70 +3273,105 @@
       ],
       "size": [
         330,
-        240
+        292
       ],
       "flags": {},
-      "order": 0,
+      "order": 40,
       "mode": 0,
       "inputs": [
         {
-          "localized_name": "image",
+          "localized_name": "Image",
           "name": "image",
           "type": "IMAGE",
-          "link": 171
+          "link": 186
         },
         {
-          "localized_name": "model",
+          "localized_name": "Model",
           "name": "model",
           "type": "COMBO",
+          "widget": {
+            "name": "model"
+          },
           "link": null
         },
         {
-          "localized_name": "sensitivity",
+          "localized_name": "Sensitivity",
           "name": "sensitivity",
+          "shape": 7,
           "type": "FLOAT",
+          "widget": {
+            "name": "sensitivity"
+          },
           "link": null
         },
         {
-          "localized_name": "process_res",
+          "localized_name": "Processing Resolution",
           "name": "process_res",
+          "shape": 7,
           "type": "INT",
+          "widget": {
+            "name": "process_res"
+          },
           "link": null
         },
         {
-          "localized_name": "mask_blur",
+          "localized_name": "Mask Blur",
           "name": "mask_blur",
+          "shape": 7,
           "type": "INT",
+          "widget": {
+            "name": "mask_blur"
+          },
           "link": null
         },
         {
-          "localized_name": "mask_offset",
+          "localized_name": "Mask Offset",
           "name": "mask_offset",
+          "shape": 7,
           "type": "INT",
+          "widget": {
+            "name": "mask_offset"
+          },
           "link": null
         },
         {
-          "localized_name": "invert_output",
+          "localized_name": "Invert Output",
           "name": "invert_output",
+          "shape": 7,
           "type": "BOOLEAN",
+          "widget": {
+            "name": "invert_output"
+          },
           "link": null
         },
         {
-          "localized_name": "refine_foreground",
+          "localized_name": "Refine Foreground",
           "name": "refine_foreground",
+          "shape": 7,
           "type": "BOOLEAN",
+          "widget": {
+            "name": "refine_foreground"
+          },
           "link": null
         },
         {
-          "localized_name": "background",
+          "localized_name": "Background",
           "name": "background",
+          "shape": 7,
           "type": "COMBO",
+          "widget": {
+            "name": "background"
+          },
           "link": null
         },
         {
-          "localized_name": "background_color",
+          "localized_name": "Background Color",
           "name": "background_color",
+          "shape": 7,
           "type": "COLORCODE",
+          "widget": {
+            "name": "background_color"
+          },
           "link": null
         }
       ],
@@ -4847,8 +3382,7 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            172,
-            173
+            271
           ]
         },
         {
@@ -4859,19 +3393,20 @@
           "links": []
         },
         {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
+          "localized_name": "MASK IMAGE",
+          "name": "MASK_IMAGE",
           "type": "IMAGE",
           "slot_index": 2,
           "links": []
         }
       ],
+      "title": "RIGHT bg->black",
       "properties": {
         "Node name for S&R": "RMBG"
       },
       "widgets_values": [
         "RMBG-2.0",
-        1.0,
+        1,
         1024,
         0,
         0,
@@ -4880,285 +3415,8 @@
         "Color",
         "#000000"
       ],
-      "title": "RIGHT bg->black"
-    },
-    {
-      "id": 103,
-      "type": "SaveImage",
-      "pos": [
-        1660,
-        3180
-      ],
-      "size": [
-        340,
-        120
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": 172
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "3D/QWEN_RIGHT"
-      ],
-      "title": "OUT RIGHT"
-    },
-    {
-      "id": 104,
-      "type": "Trellis2RenderClayView",
-      "pos": [
-        700,
-        1500
-      ],
-      "size": [
-        320,
-        220
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "obj_path",
-          "name": "obj_path",
-          "type": "STRING",
-          "link": 174
-        },
-        {
-          "localized_name": "azimuths",
-          "name": "azimuths",
-          "type": "STRING",
-          "link": null
-        },
-        {
-          "localized_name": "elevation",
-          "name": "elevation",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "ortho_scale",
-          "name": "ortho_scale",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "norm_size",
-          "name": "norm_size",
-          "type": "FLOAT",
-          "link": null
-        },
-        {
-          "localized_name": "render_size",
-          "name": "render_size",
-          "type": "INT",
-          "link": null
-        },
-        {
-          "localized_name": "shading",
-          "name": "shading",
-          "type": "COMBO",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "rendered_views",
-          "name": "rendered_views",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            175,
-            177,
-            179
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Trellis2RenderClayView"
-      },
-      "widgets_values": [
-        "",
-        "90,180,270",
-        0.0,
-        1.15,
-        1.15,
-        1024,
-        "normal"
-      ],
-      "title": "mesh normals @ 90/180/270"
-    },
-    {
-      "id": 105,
-      "type": "ImageFromBatch",
-      "pos": [
-        820,
-        1500
-      ],
-      "size": [
-        280,
-        110
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 175
-        },
-        {
-          "localized_name": "batch_index",
-          "name": "batch_index",
-          "type": "INT",
-          "link": null
-        },
-        {
-          "localized_name": "length",
-          "name": "length",
-          "type": "INT",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            176
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ImageFromBatch"
-      },
-      "widgets_values": [
-        0,
-        1
-      ],
-      "title": "view 90"
-    },
-    {
-      "id": 106,
-      "type": "ImageFromBatch",
-      "pos": [
-        1240,
-        1500
-      ],
-      "size": [
-        280,
-        110
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 177
-        },
-        {
-          "localized_name": "batch_index",
-          "name": "batch_index",
-          "type": "INT",
-          "link": null
-        },
-        {
-          "localized_name": "length",
-          "name": "length",
-          "type": "INT",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            178
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ImageFromBatch"
-      },
-      "widgets_values": [
-        1,
-        1
-      ],
-      "title": "view 180"
-    },
-    {
-      "id": 107,
-      "type": "ImageFromBatch",
-      "pos": [
-        1660,
-        1500
-      ],
-      "size": [
-        280,
-        110
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 179
-        },
-        {
-          "localized_name": "batch_index",
-          "name": "batch_index",
-          "type": "INT",
-          "link": null
-        },
-        {
-          "localized_name": "length",
-          "name": "length",
-          "type": "INT",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            180
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ImageFromBatch"
-      },
-      "widgets_values": [
-        2,
-        1
-      ],
-      "title": "view 270"
+      "color": "#222e40",
+      "bgcolor": "#364254"
     },
     {
       "id": 108,
@@ -5172,14 +3430,23 @@
         60
       ],
       "flags": {},
-      "order": 0,
+      "order": 55,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "mesh",
           "name": "mesh",
           "type": "MESHWITHVOXEL",
-          "link": 26
+          "link": 245
+        },
+        {
+          "localized_name": "max_permieters",
+          "name": "max_permieters",
+          "type": "FLOAT",
+          "widget": {
+            "name": "max_permieters"
+          },
+          "link": null
         }
       ],
       "outputs": [
@@ -5189,43 +3456,2367 @@
           "type": "MESHWITHVOXEL",
           "slot_index": 0,
           "links": [
-            181
+            246
           ]
         }
       ],
+      "title": "GPU fill AFTER remesh",
       "properties": {
         "Node name for S&R": "Trellis2FillHolesWithCuMesh"
       },
       "widgets_values": [
-        1.0
+        1
+      ]
+    },
+    {
+      "id": 110,
+      "type": "FlattenLight",
+      "pos": [
+        900,
+        2920
       ],
-      "title": "GPU fill AFTER remesh"
+      "size": [
+        315,
+        230
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 150
+        },
+        {
+          "localized_name": "gamma",
+          "name": "gamma",
+          "type": "FLOAT",
+          "widget": {
+            "name": "gamma"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "brightness",
+          "name": "brightness",
+          "type": "FLOAT",
+          "widget": {
+            "name": "brightness"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "contrast",
+          "name": "contrast",
+          "type": "FLOAT",
+          "widget": {
+            "name": "contrast"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "saturation",
+          "name": "saturation",
+          "type": "FLOAT",
+          "widget": {
+            "name": "saturation"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "protect_dark_threshold",
+          "name": "protect_dark_threshold",
+          "type": "FLOAT",
+          "widget": {
+            "name": "protect_dark_threshold"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enabled"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            184
+          ]
+        }
+      ],
+      "title": "BACK delight (match front)",
+      "properties": {
+        "Node name for S&R": "FlattenLight"
+      },
+      "widgets_values": [
+        0.1,
+        0.05,
+        0.85,
+        1.15,
+        0.2,
+        true
+      ]
+    },
+    {
+      "id": 111,
+      "type": "FlattenLight",
+      "pos": [
+        900,
+        2400
+      ],
+      "size": [
+        315,
+        230
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 129
+        },
+        {
+          "localized_name": "gamma",
+          "name": "gamma",
+          "type": "FLOAT",
+          "widget": {
+            "name": "gamma"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "brightness",
+          "name": "brightness",
+          "type": "FLOAT",
+          "widget": {
+            "name": "brightness"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "contrast",
+          "name": "contrast",
+          "type": "FLOAT",
+          "widget": {
+            "name": "contrast"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "saturation",
+          "name": "saturation",
+          "type": "FLOAT",
+          "widget": {
+            "name": "saturation"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "protect_dark_threshold",
+          "name": "protect_dark_threshold",
+          "type": "FLOAT",
+          "widget": {
+            "name": "protect_dark_threshold"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enabled"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            185
+          ]
+        }
+      ],
+      "title": "LEFT delight (match front)",
+      "properties": {
+        "Node name for S&R": "FlattenLight"
+      },
+      "widgets_values": [
+        0.1,
+        0.05,
+        0.85,
+        1.15,
+        0.2,
+        true
+      ]
+    },
+    {
+      "id": 112,
+      "type": "FlattenLight",
+      "pos": [
+        900,
+        3440
+      ],
+      "size": [
+        315,
+        230
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 171
+        },
+        {
+          "localized_name": "gamma",
+          "name": "gamma",
+          "type": "FLOAT",
+          "widget": {
+            "name": "gamma"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "brightness",
+          "name": "brightness",
+          "type": "FLOAT",
+          "widget": {
+            "name": "brightness"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "contrast",
+          "name": "contrast",
+          "type": "FLOAT",
+          "widget": {
+            "name": "contrast"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "saturation",
+          "name": "saturation",
+          "type": "FLOAT",
+          "widget": {
+            "name": "saturation"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "protect_dark_threshold",
+          "name": "protect_dark_threshold",
+          "type": "FLOAT",
+          "widget": {
+            "name": "protect_dark_threshold"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enabled"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            186
+          ]
+        }
+      ],
+      "title": "RIGHT delight (match front)",
+      "properties": {
+        "Node name for S&R": "FlattenLight"
+      },
+      "widgets_values": [
+        0.1,
+        0.05,
+        0.85,
+        1.15,
+        0.2,
+        true
+      ]
+    },
+    {
+      "id": 113,
+      "type": "Trellis2PreProcessImage",
+      "pos": [
+        300,
+        2350
+      ],
+      "size": [
+        315,
+        150
+      ],
+      "flags": {},
+      "order": 45,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 187
+        },
+        {
+          "localized_name": "padding",
+          "name": "padding",
+          "type": "INT",
+          "widget": {
+            "name": "padding"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "remove_background",
+          "name": "remove_background",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "remove_background"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "max_size",
+          "name": "max_size",
+          "type": "INT",
+          "widget": {
+            "name": "max_size"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            251
+          ]
+        }
+      ],
+      "title": "BACK -> TRELLIS framing (match front)",
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage"
+      },
+      "widgets_values": [
+        96,
+        true,
+        2048
+      ]
+    },
+    {
+      "id": 114,
+      "type": "Trellis2PreProcessImage",
+      "pos": [
+        300,
+        2600
+      ],
+      "size": [
+        315,
+        150
+      ],
+      "flags": {},
+      "order": 44,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 188
+        },
+        {
+          "localized_name": "padding",
+          "name": "padding",
+          "type": "INT",
+          "widget": {
+            "name": "padding"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "remove_background",
+          "name": "remove_background",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "remove_background"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "max_size",
+          "name": "max_size",
+          "type": "INT",
+          "widget": {
+            "name": "max_size"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            252
+          ]
+        }
+      ],
+      "title": "LEFT -> TRELLIS framing (match front)",
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage"
+      },
+      "widgets_values": [
+        96,
+        true,
+        2048
+      ]
+    },
+    {
+      "id": 115,
+      "type": "Trellis2PreProcessImage",
+      "pos": [
+        300,
+        2850
+      ],
+      "size": [
+        315,
+        150
+      ],
+      "flags": {},
+      "order": 46,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 189
+        },
+        {
+          "localized_name": "padding",
+          "name": "padding",
+          "type": "INT",
+          "widget": {
+            "name": "padding"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "remove_background",
+          "name": "remove_background",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "remove_background"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "max_size",
+          "name": "max_size",
+          "type": "INT",
+          "widget": {
+            "name": "max_size"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            253
+          ]
+        }
+      ],
+      "title": "RIGHT -> TRELLIS framing (match front)",
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage"
+      },
+      "widgets_values": [
+        96,
+        true,
+        2048
+      ]
+    },
+    {
+      "id": 127,
+      "type": "Trellis2UnWrapAndRasterizer",
+      "pos": [
+        300,
+        3200
+      ],
+      "size": [
+        400,
+        314
+      ],
+      "flags": {},
+      "order": 60,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 263
+        },
+        {
+          "localized_name": "bvh",
+          "name": "bvh",
+          "type": "BVH",
+          "link": 254
+        },
+        {
+          "localized_name": "mesh_cluster_threshold_cone_half_angle_rad",
+          "name": "mesh_cluster_threshold_cone_half_angle_rad",
+          "type": "FLOAT",
+          "widget": {
+            "name": "mesh_cluster_threshold_cone_half_angle_rad"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "mesh_cluster_refine_iterations",
+          "name": "mesh_cluster_refine_iterations",
+          "type": "INT",
+          "widget": {
+            "name": "mesh_cluster_refine_iterations"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "mesh_cluster_global_iterations",
+          "name": "mesh_cluster_global_iterations",
+          "type": "INT",
+          "widget": {
+            "name": "mesh_cluster_global_iterations"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "mesh_cluster_smooth_strength",
+          "name": "mesh_cluster_smooth_strength",
+          "type": "INT",
+          "widget": {
+            "name": "mesh_cluster_smooth_strength"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "texture_size",
+          "name": "texture_size",
+          "type": "INT",
+          "widget": {
+            "name": "texture_size"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "texture_alpha_mode",
+          "name": "texture_alpha_mode",
+          "type": "COMBO",
+          "widget": {
+            "name": "texture_alpha_mode"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "double_side_material",
+          "name": "double_side_material",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "double_side_material"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "bake_on_vertices",
+          "name": "bake_on_vertices",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "bake_on_vertices"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "use_custom_normals",
+          "name": "use_custom_normals",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "use_custom_normals"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "inpainting",
+          "name": "inpainting",
+          "type": "COMBO",
+          "widget": {
+            "name": "inpainting"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "trimesh",
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "slot_index": 0,
+          "links": [
+            219,
+            221
+          ]
+        },
+        {
+          "localized_name": "base_color_texture",
+          "name": "base_color_texture",
+          "type": "IMAGE",
+          "slot_index": 1,
+          "links": [
+            218
+          ]
+        },
+        {
+          "localized_name": "metallic_roughness_texture",
+          "name": "metallic_roughness_texture",
+          "type": "IMAGE",
+          "slot_index": 2,
+          "links": []
+        }
+      ],
+      "title": "TRELLIS OWN TEXTURE (experiment)",
+      "properties": {
+        "Node name for S&R": "Trellis2UnWrapAndRasterizer"
+      },
+      "widgets_values": [
+        60,
+        0,
+        1,
+        1,
+        4096,
+        "OPAQUE",
+        false,
+        false,
+        false,
+        "telea"
+      ]
+    },
+    {
+      "id": 128,
+      "type": "SaveImage",
+      "pos": [
+        760,
+        3200
+      ],
+      "size": [
+        320,
+        300
+      ],
+      "flags": {},
+      "order": 64,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 218
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [],
+      "title": "TRELLIS texture",
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "3D/TRELLIS_OWN_TEX"
+      ]
+    },
+    {
+      "id": 129,
+      "type": "Trellis2ExportMesh",
+      "pos": [
+        760,
+        3560
+      ],
+      "size": [
+        340,
+        126
+      ],
+      "flags": {},
+      "order": 63,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "trimesh",
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "link": 219
+        },
+        {
+          "localized_name": "path_prefix",
+          "name": "path_prefix",
+          "shape": 7,
+          "type": "STRING",
+          "link": 280
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "file_format",
+          "name": "file_format",
+          "type": "COMBO",
+          "widget": {
+            "name": "file_format"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "character_name",
+          "name": "character_name",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "character_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "glb_path",
+          "name": "glb_path",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": [
+            264
+          ]
+        },
+        {
+          "localized_name": "relative_path",
+          "name": "relative_path",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "title": "TRELLIS textured mesh (after unwrap/raster)",
+      "properties": {
+        "Node name for S&R": "Trellis2ExportMesh"
+      },
+      "widgets_values": [
+        "characters/character_posed_00003_/TRELLIS_TEXTURED",
+        "glb",
+        ""
+      ]
+    },
+    {
+      "id": 130,
+      "type": "Trellis2TrellisTexture",
+      "pos": [
+        1180,
+        3560
+      ],
+      "size": [
+        380,
+        130
+      ],
+      "flags": {},
+      "order": 68,
+      "mode": 2,
+      "inputs": [
+        {
+          "localized_name": "obj_path",
+          "name": "obj_path",
+          "type": "STRING",
+          "link": 220
+        },
+        {
+          "localized_name": "source_trimesh",
+          "name": "source_trimesh",
+          "type": "TRIMESH",
+          "link": 221
+        },
+        {
+          "localized_name": "texture_size",
+          "name": "texture_size",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "texture_size"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "base_color",
+          "name": "base_color",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            223
+          ]
+        },
+        {
+          "localized_name": "metallic_roughness",
+          "name": "metallic_roughness",
+          "type": "IMAGE",
+          "slot_index": 1,
+          "links": [
+            225
+          ]
+        }
+      ],
+      "title": "TRELLIS texture -> final UVs",
+      "properties": {
+        "Node name for S&R": "Trellis2TrellisTexture"
+      },
+      "widgets_values": [
+        4096
+      ]
+    },
+    {
+      "id": 136,
+      "type": "Trellis2MeshWithVoxelMultiViewGenerator",
+      "pos": [
+        820,
+        110
+      ],
+      "size": [
+        420,
+        978
+      ],
+      "flags": {},
+      "order": 47,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "pipeline",
+          "name": "pipeline",
+          "type": "TRELLIS2PIPELINE",
+          "link": 249
+        },
+        {
+          "localized_name": "front_image",
+          "name": "front_image",
+          "type": "IMAGE",
+          "link": 250
+        },
+        {
+          "localized_name": "back_image",
+          "name": "back_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 251
+        },
+        {
+          "localized_name": "left_image",
+          "name": "left_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 252
+        },
+        {
+          "localized_name": "right_image",
+          "name": "right_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 253
+        },
+        {
+          "localized_name": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "pipeline_type",
+          "name": "pipeline_type",
+          "type": "COMBO",
+          "widget": {
+            "name": "pipeline_type"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sparse_structure_steps",
+          "name": "sparse_structure_steps",
+          "type": "INT",
+          "widget": {
+            "name": "sparse_structure_steps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sparse_structure_guidance_strength",
+          "name": "sparse_structure_guidance_strength",
+          "type": "FLOAT",
+          "widget": {
+            "name": "sparse_structure_guidance_strength"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sparse_structure_guidance_rescale",
+          "name": "sparse_structure_guidance_rescale",
+          "type": "FLOAT",
+          "widget": {
+            "name": "sparse_structure_guidance_rescale"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sparse_structure_rescale_t",
+          "name": "sparse_structure_rescale_t",
+          "type": "FLOAT",
+          "widget": {
+            "name": "sparse_structure_rescale_t"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "shape_steps",
+          "name": "shape_steps",
+          "type": "INT",
+          "widget": {
+            "name": "shape_steps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "shape_guidance_strength",
+          "name": "shape_guidance_strength",
+          "type": "FLOAT",
+          "widget": {
+            "name": "shape_guidance_strength"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "shape_guidance_rescale",
+          "name": "shape_guidance_rescale",
+          "type": "FLOAT",
+          "widget": {
+            "name": "shape_guidance_rescale"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "shape_rescale_t",
+          "name": "shape_rescale_t",
+          "type": "FLOAT",
+          "widget": {
+            "name": "shape_rescale_t"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "texture_steps",
+          "name": "texture_steps",
+          "type": "INT",
+          "widget": {
+            "name": "texture_steps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "texture_guidance_strength",
+          "name": "texture_guidance_strength",
+          "type": "FLOAT",
+          "widget": {
+            "name": "texture_guidance_strength"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "texture_guidance_rescale",
+          "name": "texture_guidance_rescale",
+          "type": "FLOAT",
+          "widget": {
+            "name": "texture_guidance_rescale"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "texture_rescale_t",
+          "name": "texture_rescale_t",
+          "type": "FLOAT",
+          "widget": {
+            "name": "texture_rescale_t"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "max_num_tokens",
+          "name": "max_num_tokens",
+          "type": "INT",
+          "widget": {
+            "name": "max_num_tokens"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sparse_structure_resolution",
+          "name": "sparse_structure_resolution",
+          "type": "INT",
+          "widget": {
+            "name": "sparse_structure_resolution"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "generate_texture_slat",
+          "name": "generate_texture_slat",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "generate_texture_slat"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sparse_structure_guidance_interval_start",
+          "name": "sparse_structure_guidance_interval_start",
+          "type": "FLOAT",
+          "widget": {
+            "name": "sparse_structure_guidance_interval_start"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sparse_structure_guidance_interval_end",
+          "name": "sparse_structure_guidance_interval_end",
+          "type": "FLOAT",
+          "widget": {
+            "name": "sparse_structure_guidance_interval_end"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "shape_guidance_interval_start",
+          "name": "shape_guidance_interval_start",
+          "type": "FLOAT",
+          "widget": {
+            "name": "shape_guidance_interval_start"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "shape_guidance_interval_end",
+          "name": "shape_guidance_interval_end",
+          "type": "FLOAT",
+          "widget": {
+            "name": "shape_guidance_interval_end"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "texture_guidance_interval_start",
+          "name": "texture_guidance_interval_start",
+          "type": "FLOAT",
+          "widget": {
+            "name": "texture_guidance_interval_start"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "texture_guidance_interval_end",
+          "name": "texture_guidance_interval_end",
+          "type": "FLOAT",
+          "widget": {
+            "name": "texture_guidance_interval_end"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "use_tiled_decoder",
+          "name": "use_tiled_decoder",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "use_tiled_decoder"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "front_axis",
+          "name": "front_axis",
+          "type": "COMBO",
+          "widget": {
+            "name": "front_axis"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "blend_temperature",
+          "name": "blend_temperature",
+          "type": "FLOAT",
+          "widget": {
+            "name": "blend_temperature"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sampler",
+          "name": "sampler",
+          "type": "COMBO",
+          "widget": {
+            "name": "sampler"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "fill_holes",
+          "name": "fill_holes",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "fill_holes"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "hole_iterations",
+          "name": "hole_iterations",
+          "type": "INT",
+          "widget": {
+            "name": "hole_iterations"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "verbose",
+          "name": "verbose",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "verbose"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "dino_lock",
+          "name": "dino_lock",
+          "type": "FLOAT",
+          "widget": {
+            "name": "dino_lock"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "dino_substeps",
+          "name": "dino_substeps",
+          "type": "INT",
+          "widget": {
+            "name": "dino_substeps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "hole_fill_algorithm",
+          "name": "hole_fill_algorithm",
+          "type": "COMBO",
+          "widget": {
+            "name": "hole_fill_algorithm"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "dino_foundation_cap",
+          "name": "dino_foundation_cap",
+          "type": "FLOAT",
+          "widget": {
+            "name": "dino_foundation_cap"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "keep_only_shell",
+          "name": "keep_only_shell",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "keep_only_shell"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "slot_index": 0,
+          "links": [
+            266
+          ]
+        },
+        {
+          "localized_name": "bvh",
+          "name": "bvh",
+          "type": "BVH",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "title": "Trellis2 - Mesh+Voxel (view-aware MultiView)",
+      "properties": {
+        "Node name for S&R": "Trellis2MeshWithVoxelMultiViewGenerator"
+      },
+      "widgets_values": [
+        0,
+        "fixed",
+        "1024_cascade",
+        12,
+        7.5,
+        0.7,
+        5,
+        12,
+        7.5,
+        0.5,
+        3,
+        12,
+        1,
+        0,
+        3,
+        49152,
+        32,
+        true,
+        0.6,
+        1,
+        0.6,
+        1,
+        0.6,
+        0.9,
+        true,
+        "z",
+        2,
+        "euler",
+        true,
+        1,
+        true,
+        0,
+        4,
+        "flood_fill",
+        0.92,
+        true
+      ]
+    },
+    {
+      "id": 137,
+      "type": "Trellis2MeshWithVoxelToTrimesh",
+      "pos": [
+        1280,
+        110
+      ],
+      "size": [
+        300,
+        60
+      ],
+      "flags": {},
+      "order": 50,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 257
+        },
+        {
+          "localized_name": "reorient_vertices",
+          "name": "reorient_vertices",
+          "type": "COMBO",
+          "widget": {
+            "name": "reorient_vertices"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "trimesh",
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "slot_index": 0,
+          "links": [
+            258
+          ]
+        }
+      ],
+      "title": "RAW Trellis -> trimesh (no post)",
+      "properties": {
+        "Node name for S&R": "Trellis2MeshWithVoxelToTrimesh"
+      },
+      "widgets_values": [
+        "90 degrees"
+      ]
+    },
+    {
+      "id": 138,
+      "type": "Trellis2ExportMesh",
+      "pos": [
+        1280,
+        220
+      ],
+      "size": [
+        420.4634765625,
+        130
+      ],
+      "flags": {},
+      "order": 52,
+      "mode": 2,
+      "inputs": [
+        {
+          "localized_name": "trimesh",
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "link": 258
+        },
+        {
+          "localized_name": "path_prefix",
+          "name": "path_prefix",
+          "shape": 7,
+          "type": "STRING",
+          "link": 279
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "file_format",
+          "name": "file_format",
+          "type": "COMBO",
+          "widget": {
+            "name": "file_format"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "character_name",
+          "name": "character_name",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "character_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "glb_path",
+          "name": "glb_path",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "localized_name": "relative_path",
+          "name": "relative_path",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "title": "[MUTED while iterating] WRITE RAW Trellis GLB (immediately)",
+      "properties": {
+        "Node name for S&R": "Trellis2ExportMesh"
+      },
+      "widgets_values": [
+        "characters/character_posed_00003_/TRELLIS_RAW",
+        "glb",
+        ""
+      ]
+    },
+    {
+      "id": 139,
+      "type": "Trellis2GuidedRetopo",
+      "pos": [
+        1140,
+        3560
+      ],
+      "size": [
+        360,
+        266
+      ],
+      "flags": {},
+      "order": 67,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "glb_path",
+          "name": "glb_path",
+          "type": "STRING",
+          "link": 264
+        },
+        {
+          "localized_name": "graft_pelvis",
+          "name": "graft_pelvis",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "link": null
+        },
+        {
+          "localized_name": "run_dir",
+          "name": "run_dir",
+          "shape": 7,
+          "type": "STRING",
+          "link": 278
+        },
+        {
+          "localized_name": "target_quads",
+          "name": "target_quads",
+          "type": "INT",
+          "widget": {
+            "name": "target_quads"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "voxel_size",
+          "name": "voxel_size",
+          "type": "FLOAT",
+          "widget": {
+            "name": "voxel_size"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "cut_openings",
+          "name": "cut_openings",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "cut_openings"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "guide_mouth",
+          "name": "guide_mouth",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "guide_mouth"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "body_features",
+          "name": "body_features",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "body_features"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "joint_cuts",
+          "name": "joint_cuts",
+          "type": "INT",
+          "widget": {
+            "name": "joint_cuts"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "keep_openings",
+          "name": "keep_openings",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "keep_openings"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enabled"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "lowpoly_glb",
+          "name": "lowpoly_glb",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "localized_name": "lowpoly_obj",
+          "name": "lowpoly_obj",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": [
+            291
+          ]
+        }
+      ],
+      "title": "LOW POLY retopo (quads, adaptive density, no cuts)",
+      "properties": {
+        "Node name for S&R": "Trellis2GuidedRetopo"
+      },
+      "widgets_values": [
+        80000,
+        0.0015,
+        false,
+        true,
+        true,
+        4,
+        false,
+        true
+      ]
+    },
+    {
+      "id": 140,
+      "type": "Trellis2SculptCache",
+      "pos": [
+        1080,
+        -40
+      ],
+      "size": [
+        300,
+        122
+      ],
+      "flags": {},
+      "order": 48,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "key_image",
+          "name": "key_image",
+          "type": "IMAGE",
+          "link": 265
+        },
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "shape": 7,
+          "type": "MESHWITHVOXEL",
+          "link": 266
+        },
+        {
+          "localized_name": "cache_dir",
+          "name": "cache_dir",
+          "shape": 7,
+          "type": "STRING",
+          "link": 274
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enabled"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "voxel_resolution",
+          "name": "voxel_resolution",
+          "type": "COMBO",
+          "widget": {
+            "name": "voxel_resolution"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "slot_index": 0,
+          "links": [
+            255,
+            257
+          ]
+        },
+        {
+          "localized_name": "bvh",
+          "name": "bvh",
+          "type": "BVH",
+          "slot_index": 1,
+          "links": [
+            254
+          ]
+        }
+      ],
+      "title": "SCULPT CACHE",
+      "properties": {
+        "Node name for S&R": "Trellis2SculptCache"
+      },
+      "widgets_values": [
+        true,
+        1024
+      ]
+    },
+    {
+      "id": 141,
+      "type": "Trellis2ViewCache",
+      "pos": [
+        1440,
+        2770
+      ],
+      "size": [
+        300,
+        122
+      ],
+      "flags": {},
+      "order": 42,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "key_image",
+          "name": "key_image",
+          "type": "IMAGE",
+          "link": 268
+        },
+        {
+          "localized_name": "generated",
+          "name": "generated",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 267
+        },
+        {
+          "localized_name": "cache_dir",
+          "name": "cache_dir",
+          "shape": 7,
+          "type": "STRING",
+          "link": 275
+        },
+        {
+          "localized_name": "tag",
+          "name": "tag",
+          "type": "STRING",
+          "widget": {
+            "name": "tag"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enabled"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            187
+          ]
+        }
+      ],
+      "title": "VIEW CACHE BACK",
+      "properties": {
+        "Node name for S&R": "Trellis2ViewCache"
+      },
+      "widgets_values": [
+        "BACK",
+        true
+      ]
+    },
+    {
+      "id": 142,
+      "type": "Trellis2ViewCache",
+      "pos": [
+        1020,
+        2770
+      ],
+      "size": [
+        300,
+        122
+      ],
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "key_image",
+          "name": "key_image",
+          "type": "IMAGE",
+          "link": 270
+        },
+        {
+          "localized_name": "generated",
+          "name": "generated",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 269
+        },
+        {
+          "localized_name": "cache_dir",
+          "name": "cache_dir",
+          "shape": 7,
+          "type": "STRING",
+          "link": 276
+        },
+        {
+          "localized_name": "tag",
+          "name": "tag",
+          "type": "STRING",
+          "widget": {
+            "name": "tag"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enabled"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            188
+          ]
+        }
+      ],
+      "title": "VIEW CACHE LEFT",
+      "properties": {
+        "Node name for S&R": "Trellis2ViewCache"
+      },
+      "widgets_values": [
+        "LEFT",
+        true
+      ]
+    },
+    {
+      "id": 143,
+      "type": "Trellis2ViewCache",
+      "pos": [
+        1860,
+        2770
+      ],
+      "size": [
+        300,
+        122
+      ],
+      "flags": {},
+      "order": 43,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "key_image",
+          "name": "key_image",
+          "type": "IMAGE",
+          "link": 272
+        },
+        {
+          "localized_name": "generated",
+          "name": "generated",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 271
+        },
+        {
+          "localized_name": "cache_dir",
+          "name": "cache_dir",
+          "shape": 7,
+          "type": "STRING",
+          "link": 277
+        },
+        {
+          "localized_name": "tag",
+          "name": "tag",
+          "type": "STRING",
+          "widget": {
+            "name": "tag"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enabled"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            189
+          ]
+        }
+      ],
+      "title": "VIEW CACHE RIGHT",
+      "properties": {
+        "Node name for S&R": "Trellis2ViewCache"
+      },
+      "widgets_values": [
+        "RIGHT",
+        true
+      ]
+    },
+    {
+      "id": 144,
+      "type": "Trellis2RunPaths",
+      "pos": [
+        50,
+        900
+      ],
+      "size": [
+        330,
+        178
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "key_image",
+          "name": "key_image",
+          "type": "IMAGE",
+          "link": 273
+        },
+        {
+          "localized_name": "character",
+          "name": "character",
+          "shape": 7,
+          "type": "STRING",
+          "link": 286
+        },
+        {
+          "localized_name": "category",
+          "name": "category",
+          "shape": 7,
+          "type": "STRING",
+          "link": 287
+        },
+        {
+          "localized_name": "character_override",
+          "name": "character_override",
+          "type": "STRING",
+          "widget": {
+            "name": "character_override"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "character",
+          "name": "character",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "localized_name": "cache_dir",
+          "name": "cache_dir",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": [
+            274,
+            275,
+            276,
+            277
+          ]
+        },
+        {
+          "localized_name": "run_dir",
+          "name": "run_dir",
+          "type": "STRING",
+          "slot_index": 2,
+          "links": [
+            278
+          ]
+        },
+        {
+          "localized_name": "views_prefix",
+          "name": "views_prefix",
+          "type": "STRING",
+          "slot_index": 3,
+          "links": []
+        },
+        {
+          "localized_name": "hp_raw_prefix",
+          "name": "hp_raw_prefix",
+          "type": "STRING",
+          "slot_index": 4,
+          "links": [
+            279
+          ]
+        },
+        {
+          "localized_name": "run_prefix",
+          "name": "run_prefix",
+          "type": "STRING",
+          "slot_index": 5,
+          "links": [
+            280
+          ]
+        },
+        {
+          "localized_name": "hp_clean_prefix",
+          "name": "hp_clean_prefix",
+          "type": "STRING",
+          "slot_index": 6,
+          "links": [
+            284
+          ]
+        }
+      ],
+      "title": "RUN PATHS (character / cache / run)",
+      "properties": {
+        "Node name for S&R": "Trellis2RunPaths"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 145,
+      "type": "Trellis2CleanHighPoly",
+      "pos": [
+        1860,
+        900
+      ],
+      "size": [
+        300,
+        78
+      ],
+      "flags": {},
+      "order": 57,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 281
+        },
+        {
+          "localized_name": "enabled",
+          "name": "enabled",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "enabled"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "slot_index": 0,
+          "links": [
+            247,
+            263,
+            282
+          ]
+        }
+      ],
+      "title": "CLEAN HIGH POLY",
+      "properties": {
+        "Node name for S&R": "Trellis2CleanHighPoly"
+      },
+      "widgets_values": [
+        true
+      ]
+    },
+    {
+      "id": 146,
+      "type": "Trellis2MeshWithVoxelToTrimesh",
+      "pos": [
+        1860,
+        1020
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 61,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "mesh",
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 282
+        },
+        {
+          "localized_name": "reorient_vertices",
+          "name": "reorient_vertices",
+          "type": "COMBO",
+          "widget": {
+            "name": "reorient_vertices"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "trimesh",
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "slot_index": 0,
+          "links": [
+            283
+          ]
+        }
+      ],
+      "title": "CLEAN HP -> trimesh",
+      "properties": {
+        "Node name for S&R": "Trellis2MeshWithVoxelToTrimesh"
+      },
+      "widgets_values": [
+        "90 degrees"
+      ]
+    },
+    {
+      "id": 147,
+      "type": "Trellis2ExportMesh",
+      "pos": [
+        1860,
+        1110
+      ],
+      "size": [
+        390.20078125,
+        126
+      ],
+      "flags": {},
+      "order": 65,
+      "mode": 2,
+      "inputs": [
+        {
+          "localized_name": "trimesh",
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "link": 283
+        },
+        {
+          "localized_name": "path_prefix",
+          "name": "path_prefix",
+          "shape": 7,
+          "type": "STRING",
+          "link": 284
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "file_format",
+          "name": "file_format",
+          "type": "COMBO",
+          "widget": {
+            "name": "file_format"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "character_name",
+          "name": "character_name",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "character_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "glb_path",
+          "name": "glb_path",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "localized_name": "relative_path",
+          "name": "relative_path",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "title": "[MUTED while iterating] WRITE CLEANED HP (run folder)",
+      "properties": {
+        "Node name for S&R": "Trellis2ExportMesh"
+      },
+      "widgets_values": [
+        "characters/HP_CLEANED",
+        "glb",
+        ""
+      ]
+    },
+    {
+      "id": 148,
+      "type": "Trellis2CharacterSource",
+      "pos": [
+        50,
+        730
+      ],
+      "size": [
+        582.7076171875,
+        178
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 285
+        },
+        {
+          "localized_name": "queue_folder",
+          "name": "queue_folder",
+          "type": "STRING",
+          "widget": {
+            "name": "queue_folder"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            1,
+            96,
+            265,
+            268,
+            270,
+            272,
+            273
+          ]
+        },
+        {
+          "localized_name": "character",
+          "name": "character",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": [
+            286
+          ]
+        },
+        {
+          "localized_name": "source_file",
+          "name": "source_file",
+          "type": "STRING",
+          "slot_index": 2,
+          "links": []
+        },
+        {
+          "localized_name": "category",
+          "name": "category",
+          "type": "STRING",
+          "slot_index": 3,
+          "links": [
+            287
+          ]
+        },
+        {
+          "localized_name": "left_prompt",
+          "name": "left_prompt",
+          "type": "STRING",
+          "slot_index": 4,
+          "links": [
+            288
+          ]
+        },
+        {
+          "localized_name": "back_prompt",
+          "name": "back_prompt",
+          "type": "STRING",
+          "slot_index": 5,
+          "links": [
+            289
+          ]
+        },
+        {
+          "localized_name": "right_prompt",
+          "name": "right_prompt",
+          "type": "STRING",
+          "slot_index": 6,
+          "links": [
+            290
+          ]
+        }
+      ],
+      "title": "CHARACTER SOURCE (linked image wins; bypass LoadImage to work through queue_folder)",
+      "properties": {
+        "Node name for S&R": "Trellis2CharacterSource"
+      },
+      "widgets_values": [
+        "female_elf/queue"
+      ]
+    },
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        50,
+        380
+      ],
+      "size": [
+        315,
+        314
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 2,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "choose file to upload",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            285
+          ]
+        },
+        {
+          "localized_name": "MASK",
+          "name": "MASK",
+          "type": "MASK",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "character_posed_00003_.png",
+        "image"
+      ]
     }
   ],
   "links": [
     [
-      89,
-      4,
-      0,
-      53,
-      0,
-      "MESHWITHVOXEL"
-    ],
-    [
       1,
-      1,
+      148,
       0,
       3,
       0,
       "IMAGE"
-    ],
-    [
-      2,
-      2,
-      0,
-      4,
-      0,
-      "TRELLIS2PIPELINE"
     ],
     [
       4,
@@ -5234,38 +5825,6 @@
       19,
       0,
       "TRIMESH"
-    ],
-    [
-      8,
-      15,
-      0,
-      8,
-      1,
-      "IMAGE"
-    ],
-    [
-      16,
-      8,
-      1,
-      11,
-      0,
-      "IMAGE"
-    ],
-    [
-      17,
-      8,
-      2,
-      12,
-      0,
-      "IMAGE"
-    ],
-    [
-      18,
-      8,
-      3,
-      13,
-      0,
-      "IMAGE"
     ],
     [
       19,
@@ -5281,46 +5840,6 @@
       0,
       15,
       0,
-      "IMAGE"
-    ],
-    [
-      26,
-      16,
-      0,
-      108,
-      0,
-      "MESHWITHVOXEL"
-    ],
-    [
-      32,
-      19,
-      0,
-      8,
-      0,
-      "TRIMESH"
-    ],
-    [
-      48,
-      8,
-      1,
-      27,
-      0,
-      "IMAGE"
-    ],
-    [
-      49,
-      8,
-      2,
-      27,
-      1,
-      "IMAGE"
-    ],
-    [
-      50,
-      8,
-      3,
-      27,
-      2,
       "IMAGE"
     ],
     [
@@ -5340,48 +5859,8 @@
       "IMAGE"
     ],
     [
-      83,
-      27,
-      1,
-      46,
-      0,
-      "IMAGE"
-    ],
-    [
-      84,
-      27,
-      2,
-      47,
-      0,
-      "IMAGE"
-    ],
-    [
-      86,
-      19,
-      0,
-      48,
-      0,
-      "TRIMESH"
-    ],
-    [
-      87,
-      15,
-      0,
-      48,
-      1,
-      "IMAGE"
-    ],
-    [
-      88,
-      48,
-      0,
-      49,
-      0,
-      "IMAGE"
-    ],
-    [
       90,
-      19,
+      50,
       0,
       52,
       0,
@@ -5396,30 +5875,6 @@
       "MIA_MODEL"
     ],
     [
-      92,
-      27,
-      0,
-      52,
-      6,
-      "STRING"
-    ],
-    [
-      93,
-      53,
-      0,
-      57,
-      0,
-      "MESHWITHVOXEL"
-    ],
-    [
-      94,
-      54,
-      0,
-      5,
-      0,
-      "MESHWITHVOXEL"
-    ],
-    [
       95,
       54,
       1,
@@ -5429,18 +5884,10 @@
     ],
     [
       96,
-      1,
+      148,
       0,
       56,
       0,
-      "IMAGE"
-    ],
-    [
-      97,
-      56,
-      0,
-      4,
-      1,
       "IMAGE"
     ],
     [
@@ -5520,7 +5967,7 @@
       65,
       0,
       68,
-      2,
+      1,
       "VAE"
     ],
     [
@@ -5548,22 +5995,6 @@
       "LATENT"
     ],
     [
-      113,
-      72,
-      0,
-      73,
-      0,
-      "IMAGE"
-    ],
-    [
-      114,
-      65,
-      0,
-      73,
-      1,
-      "VAE"
-    ],
-    [
       115,
       64,
       0,
@@ -5576,7 +6007,7 @@
       65,
       0,
       74,
-      2,
+      1,
       "VAE"
     ],
     [
@@ -5584,7 +6015,7 @@
       15,
       0,
       74,
-      3,
+      2,
       "IMAGE"
     ],
     [
@@ -5612,22 +6043,6 @@
       "LATENT"
     ],
     [
-      121,
-      76,
-      0,
-      77,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      122,
-      73,
-      0,
-      77,
-      1,
-      "LATENT"
-    ],
-    [
       123,
       63,
       0,
@@ -5637,7 +6052,7 @@
     ],
     [
       124,
-      77,
+      76,
       0,
       78,
       1,
@@ -5679,41 +6094,9 @@
       129,
       79,
       0,
-      80,
+      111,
       0,
       "IMAGE"
-    ],
-    [
-      130,
-      80,
-      0,
-      81,
-      0,
-      "IMAGE"
-    ],
-    [
-      131,
-      80,
-      0,
-      8,
-      3,
-      "IMAGE"
-    ],
-    [
-      134,
-      83,
-      0,
-      84,
-      0,
-      "IMAGE"
-    ],
-    [
-      135,
-      65,
-      0,
-      84,
-      1,
-      "VAE"
     ],
     [
       136,
@@ -5728,7 +6111,7 @@
       65,
       0,
       85,
-      2,
+      1,
       "VAE"
     ],
     [
@@ -5736,7 +6119,7 @@
       15,
       0,
       85,
-      3,
+      2,
       "IMAGE"
     ],
     [
@@ -5764,22 +6147,6 @@
       "LATENT"
     ],
     [
-      142,
-      87,
-      0,
-      88,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      143,
-      84,
-      0,
-      88,
-      1,
-      "LATENT"
-    ],
-    [
       144,
       63,
       0,
@@ -5789,7 +6156,7 @@
     ],
     [
       145,
-      88,
+      87,
       0,
       89,
       1,
@@ -5831,41 +6198,9 @@
       150,
       90,
       0,
-      91,
+      110,
       0,
       "IMAGE"
-    ],
-    [
-      151,
-      91,
-      0,
-      92,
-      0,
-      "IMAGE"
-    ],
-    [
-      152,
-      91,
-      0,
-      8,
-      2,
-      "IMAGE"
-    ],
-    [
-      155,
-      94,
-      0,
-      95,
-      0,
-      "IMAGE"
-    ],
-    [
-      156,
-      65,
-      0,
-      95,
-      1,
-      "VAE"
     ],
     [
       157,
@@ -5880,7 +6215,7 @@
       65,
       0,
       96,
-      2,
+      1,
       "VAE"
     ],
     [
@@ -5888,7 +6223,7 @@
       15,
       0,
       96,
-      3,
+      2,
       "IMAGE"
     ],
     [
@@ -5916,22 +6251,6 @@
       "LATENT"
     ],
     [
-      163,
-      98,
-      0,
-      99,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      164,
-      95,
-      0,
-      99,
-      1,
-      "LATENT"
-    ],
-    [
       165,
       63,
       0,
@@ -5941,7 +6260,7 @@
     ],
     [
       166,
-      99,
+      98,
       0,
       100,
       1,
@@ -5983,101 +6302,458 @@
       171,
       101,
       0,
+      112,
+      0,
+      "IMAGE"
+    ],
+    [
+      184,
+      110,
+      0,
+      91,
+      0,
+      "IMAGE"
+    ],
+    [
+      185,
+      111,
+      0,
+      80,
+      0,
+      "IMAGE"
+    ],
+    [
+      186,
+      112,
+      0,
       102,
       0,
       "IMAGE"
     ],
     [
-      172,
-      102,
+      187,
+      141,
       0,
-      103,
+      113,
       0,
       "IMAGE"
     ],
     [
-      173,
-      102,
+      188,
+      142,
       0,
-      8,
-      4,
+      114,
+      0,
       "IMAGE"
     ],
     [
-      174,
+      189,
+      143,
+      0,
+      115,
+      0,
+      "IMAGE"
+    ],
+    [
+      218,
+      127,
+      1,
+      128,
+      0,
+      "IMAGE"
+    ],
+    [
+      219,
+      127,
+      0,
+      129,
+      0,
+      "TRIMESH"
+    ],
+    [
+      220,
       19,
       1,
-      104,
+      130,
       0,
       "STRING"
     ],
     [
-      175,
-      104,
+      221,
+      127,
       0,
-      105,
+      130,
+      1,
+      "TRIMESH"
+    ],
+    [
+      223,
+      130,
+      0,
+      27,
       0,
       "IMAGE"
     ],
     [
-      176,
-      105,
-      0,
-      72,
-      0,
+      225,
+      130,
+      1,
+      27,
+      1,
       "IMAGE"
     ],
     [
-      177,
-      104,
+      244,
+      53,
       0,
-      106,
+      57,
       0,
-      "IMAGE"
+      "*"
     ],
     [
-      178,
-      106,
+      245,
+      16,
       0,
-      83,
+      108,
       0,
-      "IMAGE"
+      "MESHWITHVOXEL"
     ],
     [
-      179,
-      104,
-      0,
-      107,
-      0,
-      "IMAGE"
-    ],
-    [
-      180,
-      107,
-      0,
-      94,
-      0,
-      "IMAGE"
-    ],
-    [
-      181,
+      246,
       108,
       0,
       54,
       0,
       "MESHWITHVOXEL"
+    ],
+    [
+      247,
+      145,
+      0,
+      5,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      249,
+      2,
+      0,
+      136,
+      0,
+      "TRELLIS2PIPELINE"
+    ],
+    [
+      250,
+      56,
+      0,
+      136,
+      1,
+      "IMAGE"
+    ],
+    [
+      251,
+      113,
+      0,
+      136,
+      2,
+      "IMAGE"
+    ],
+    [
+      252,
+      114,
+      0,
+      136,
+      3,
+      "IMAGE"
+    ],
+    [
+      253,
+      115,
+      0,
+      136,
+      4,
+      "IMAGE"
+    ],
+    [
+      254,
+      140,
+      1,
+      127,
+      1,
+      "BVH"
+    ],
+    [
+      255,
+      140,
+      0,
+      53,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      257,
+      140,
+      0,
+      137,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      258,
+      137,
+      0,
+      138,
+      0,
+      "TRIMESH"
+    ],
+    [
+      263,
+      145,
+      0,
+      127,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      264,
+      129,
+      0,
+      139,
+      0,
+      "STRING"
+    ],
+    [
+      266,
+      136,
+      0,
+      140,
+      1,
+      "MESHWITHVOXEL"
+    ],
+    [
+      265,
+      148,
+      0,
+      140,
+      0,
+      "IMAGE"
+    ],
+    [
+      267,
+      91,
+      0,
+      141,
+      1,
+      "IMAGE"
+    ],
+    [
+      268,
+      148,
+      0,
+      141,
+      0,
+      "IMAGE"
+    ],
+    [
+      269,
+      80,
+      0,
+      142,
+      1,
+      "IMAGE"
+    ],
+    [
+      270,
+      148,
+      0,
+      142,
+      0,
+      "IMAGE"
+    ],
+    [
+      271,
+      102,
+      0,
+      143,
+      1,
+      "IMAGE"
+    ],
+    [
+      272,
+      148,
+      0,
+      143,
+      0,
+      "IMAGE"
+    ],
+    [
+      273,
+      148,
+      0,
+      144,
+      0,
+      "IMAGE"
+    ],
+    [
+      274,
+      144,
+      1,
+      140,
+      2,
+      "STRING"
+    ],
+    [
+      275,
+      144,
+      1,
+      141,
+      2,
+      "STRING"
+    ],
+    [
+      276,
+      144,
+      1,
+      142,
+      2,
+      "STRING"
+    ],
+    [
+      277,
+      144,
+      1,
+      143,
+      2,
+      "STRING"
+    ],
+    [
+      278,
+      144,
+      2,
+      139,
+      2,
+      "STRING"
+    ],
+    [
+      279,
+      144,
+      4,
+      138,
+      1,
+      "STRING"
+    ],
+    [
+      280,
+      144,
+      5,
+      129,
+      1,
+      "STRING"
+    ],
+    [
+      281,
+      54,
+      0,
+      145,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      282,
+      145,
+      0,
+      146,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      283,
+      146,
+      0,
+      147,
+      0,
+      "TRIMESH"
+    ],
+    [
+      284,
+      144,
+      6,
+      147,
+      1,
+      "STRING"
+    ],
+    [
+      285,
+      1,
+      0,
+      148,
+      0,
+      "IMAGE"
+    ],
+    [
+      286,
+      148,
+      1,
+      144,
+      1,
+      "STRING"
+    ],
+    [
+      287,
+      148,
+      3,
+      144,
+      2,
+      "STRING"
+    ],
+    [
+      288,
+      148,
+      4,
+      74,
+      5,
+      "STRING"
+    ],
+    [
+      289,
+      148,
+      5,
+      85,
+      5,
+      "STRING"
+    ],
+    [
+      290,
+      148,
+      6,
+      96,
+      5,
+      "STRING"
+    ],
+    [
+      291,
+      139,
+      1,
+      52,
+      6,
+      "STRING"
     ]
   ],
   "groups": [],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.015255979947709,
+      "scale": 1.3513057093104008,
       "offset": [
-        -2058.90526094504,
-        -1142.1482729970535
+        112.99367420556791,
+        -194.5492741895922
       ]
-    }
+    },
+    "frontendVersion": "1.43.18",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
   },
   "version": 0.4
 }
