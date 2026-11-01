@@ -1,0 +1,9 @@
+# __init__.py is the node; everything else here is a working file.
+#
+# *.bak_* are the hand-made "before I changed it" copies -- 24 of them, 4.2 MB, and three are
+# byte-identical to the live file. They were the only safety net while this node was uncommitted.
+# Git is the history now.
+__pycache__/
+*.pyc
+*.bak_*
+*.bak

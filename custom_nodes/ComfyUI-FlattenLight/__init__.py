@@ -85,7 +85,7 @@ def _detect_eye_info_opencv(front_image_pil):
         lum  = patch.mean(axis=2)
         mask = (lum > 35) & (lum < 190)
         if mask.sum() > 4:
-            return tuple(patch[mask].mean(axis=0).clip(0, 255).astype(int))
+            return tuple(int(v) for v in patch[mask].mean(axis=0).clip(0, 255))
         return (60, 40, 30)
 
     lx, ly, lr = centres[0]
@@ -101,6 +101,134 @@ def _detect_eye_info_opencv(front_image_pil):
     print(f"[EyeDetect-CV] Left  eye UV={info['image_left_uv']}  color={info['image_left_color']}")
     print(f"[EyeDetect-CV] Right eye UV={info['image_right_uv']}  color={info['image_right_color']}")
     return info
+
+
+def _mp_face_model():
+    """Path to a MediaPipe Tasks face_landmarker bundle. Prefer an explicit env var, then any
+    .task already shipped with another custom node -- LivePortraitKJ carries one -- so nothing has
+    to be downloaded (this machine's Norton SSL interception makes that painful)."""
+    import glob as _g
+    _e = os.environ.get("FL_FACE_LANDMARKER")
+    if _e and os.path.exists(_e):
+        return _e
+    _cn = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for _pat in ("ComfyUI-LivePortraitKJ/media_pipe/mp_models/face_landmarker*.task",
+                 "*/**/face_landmarker*.task"):
+        for _m in _g.glob(os.path.join(_cn, _pat), recursive=True):
+            return _m
+    return None
+
+
+def _head_crop_box(img_np, frac=0.22):
+    """Square box around the head, from the foreground silhouette.
+
+    The front photo is a full-body T-pose at 896px, so the face is only ~90px across and
+    MediaPipe's detector finds NOTHING in it (measured: 0 faces). Cropping to the head makes
+    the same image detect cleanly (478 landmarks, both irises)."""
+    h, w = img_np.shape[:2]
+    _bg = np.median(np.concatenate([img_np[:, :8].reshape(-1, 3),
+                                    img_np[:, -8:].reshape(-1, 3)]), axis=0)
+    _fg = (np.abs(img_np.astype(int) - _bg.astype(int)).sum(2) > 40)
+    _rows = np.where(_fg.any(1))[0]
+    if not len(_rows):
+        return None
+    _top = int(_rows[0])
+    _band = _fg[_top:_top + int(0.25 * h)]
+    _cols = np.where(_band.any(0))[0]
+    if not len(_cols):
+        return None
+    _cx = int(0.5 * (_cols[0] + _cols[-1]))
+    _side = int(frac * h)
+    _x0 = max(0, _cx - _side // 2); _x1 = min(w, _x0 + _side)
+    _y0 = max(0, _top - int(0.02 * h)); _y1 = min(h, _y0 + _side)
+    return _x0, _y0, _x1, _y1
+
+
+def _detect_eye_info_tasks(img_np):
+    """MediaPipe >= 0.10.14 removed the `solutions` API entirely (0.10.35 here: mp.solutions is
+    gone AND mediapipe.python is gone). Only the Tasks API remains, so use FaceLandmarker."""
+    from PIL import Image as _I
+    import mediapipe as mp
+    from mediapipe.tasks.python import BaseOptions
+    from mediapipe.tasks.python.vision import FaceLandmarker, FaceLandmarkerOptions, RunningMode
+    _model = _mp_face_model()
+    if not _model:
+        print("[EyeDetect] Tasks API available but no face_landmarker .task model found "
+              "(set FL_FACE_LANDMARKER)")
+        return None
+    _box = _head_crop_box(img_np)
+    if _box is None:
+        return None
+    _x0, _y0, _x1, _y1 = _box
+    h, w = img_np.shape[:2]
+    _crop = _I.fromarray(img_np[_y0:_y1, _x0:_x1])
+    _crop = _crop.resize((_crop.width * 2, _crop.height * 2), _I.LANCZOS)
+    _opt = FaceLandmarkerOptions(base_options=BaseOptions(model_asset_path=_model),
+                                 running_mode=RunningMode.IMAGE, num_faces=1)
+    with FaceLandmarker.create_from_options(_opt) as _lmk:
+        _res = _lmk.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.array(_crop)))
+    if not _res.face_landmarks:
+        print(f"[EyeDetect] Tasks: no face in the head crop {_x1-_x0}x{_y1-_y0}px")
+        return None
+    _L = _res.face_landmarks[0]
+    if len(_L) < 478:
+        print(f"[EyeDetect] Tasks: model returned {len(_L)} landmarks, no iris ring")
+        return None
+    _cw = _x1 - _x0; _ch = _y1 - _y0
+    # Sample COLOUR from the upscaled crop, not the original: at 896px the iris is ~3px across,
+    # which is far too few pixels to average a colour from. In the 2x crop it is ~13px.
+    _ca = np.array(_crop)
+    _lrc = (abs(_L[469].x - _L[471].x) + abs(_L[470].y - _L[472].y)) / 4.0
+    _rrc = (abs(_L[474].x - _L[476].x) + abs(_L[475].y - _L[477].y)) / 4.0
+    # crop-normalised -> whole-image normalised, so the rest of the pipeline is unchanged
+    G = {i: ((_x0 + _L[i].x * _cw) / w, (_y0 + _L[i].y * _ch) / h) for i in range(468, 478)}
+    # 469/471 are the iris ring's HORIZONTAL pair and 470/472 the VERTICAL pair, so the radius
+    # comes from 469/471 in x and 470/472 in y. The original code paired them the other way round,
+    # which differences two nearly-equal coordinates and yields a radius of ~0 (measured 0.0001 =
+    # 0.09px). It never surfaced because MediaPipe never ran on this machine.
+    l_r = (abs(G[469][0] - G[471][0]) + abs(G[470][1] - G[472][1])) / 4.0
+    r_r = (abs(G[474][0] - G[476][0]) + abs(G[475][1] - G[477][1])) / 4.0
+    info = {
+        'image_left_uv':      (float(G[473][0]), float(G[473][1])),
+        'image_left_radius':  float(r_r),
+        'image_left_color':   _iris_color(_ca, _L[473].x, _L[473].y, _rrc),
+        'image_right_uv':     (float(G[468][0]), float(G[468][1])),
+        'image_right_radius': float(l_r),
+        'image_right_color':  _iris_color(_ca, _L[468].x, _L[468].y, _lrc),
+    }
+    print(f"[EyeDetect] Tasks FaceLandmarker on {_cw}x{_ch} head crop: "
+          f"left UV={info['image_left_uv']} r={info['image_left_radius']:.4f} "
+          f"color={info['image_left_color']}", flush=True)
+    print(f"[EyeDetect] Tasks: right UV={info['image_right_uv']} "
+          f"r={info['image_right_radius']:.4f} color={info['image_right_color']}", flush=True)
+    return info
+
+
+def _iris_color(img_np, cx, cy, radius):
+    """Median colour of the iris ANNULUS.
+
+    A square patch at 0.55r is mostly pupil and lash shadow -- measured (77,66,50) on eyes that
+    are visibly light grey-green. Take the ring between 0.35r and 0.90r instead, which is iris and
+    nothing else, and use the MEDIAN so a stray artifact (this render has a red blob in one eye
+    corner) cannot drag the result.
+    """
+    h, w = img_np.shape[:2]
+    px, py = int(cx * w), int(cy * h)
+    R = max(2, int(radius * w))
+    y0, y1 = max(0, py - R), min(h, py + R + 1)
+    x0, x1 = max(0, px - R), min(w, px + R + 1)
+    patch = img_np[y0:y1, x0:x1].astype(float)
+    if patch.size == 0:
+        return (80, 55, 35)
+    yy, xx = np.mgrid[y0:y1, x0:x1]
+    rr = np.sqrt((xx - px) ** 2 + (yy - py) ** 2) / max(R, 1)
+    lum = patch.mean(axis=2)
+    mask = (rr >= 0.35) & (rr <= 0.90) & (lum > 35) & (lum < 220)
+    if mask.sum() < 6:                       # tiny iris: fall back to the whole disc
+        mask = (rr <= 1.0) & (lum > 35) & (lum < 220)
+    if mask.sum() >= 3:
+        return tuple(int(v) for v in np.median(patch[mask], axis=0).clip(0, 255))
+    return (80, 55, 35)
 
 
 def _detect_eye_info(front_image_pil):
@@ -138,9 +266,14 @@ def _detect_eye_info(front_image_pil):
             except Exception:
                 pass
         if _FaceMesh is None:
-            print("[EyeDetect] MediaPipe FaceMesh not accessible. "
-                  "Try: pip install mediapipe==0.10.9")
-            return None
+            # >= 0.10.14: legacy solutions gone -> Tasks API. And do NOT `return None` here as it
+            # used to: that skipped the OpenCV fallback below entirely, so a missing legacy API
+            # meant no eyes at all rather than degraded eyes.
+            _ti = _detect_eye_info_tasks(img_np)
+            if _ti is not None:
+                return _ti
+            print("[EyeDetect] Tasks API path failed — falling back to OpenCV Haar cascade")
+            raise RuntimeError("no FaceMesh")
 
         with _FaceMesh(
             static_image_mode=True,
@@ -155,8 +288,9 @@ def _detect_eye_info(front_image_pil):
             lm = results.multi_face_landmarks[0].landmark
 
             # Iris radii from vertical + horizontal extent of the 5-point iris ring
-            l_r = (abs(lm[469].y - lm[471].y) + abs(lm[470].x - lm[472].x)) / 4.0
-            r_r = (abs(lm[474].y - lm[476].y) + abs(lm[475].x - lm[477].x)) / 4.0
+            # axes were swapped here too -- see the Tasks path above
+            l_r = (abs(lm[469].x - lm[471].x) + abs(lm[470].y - lm[472].y)) / 4.0
+            r_r = (abs(lm[474].x - lm[476].x) + abs(lm[475].y - lm[477].y)) / 4.0
 
             def iris_color(cx, cy, radius):
                 """Sample the iris zone, excluding dark pupil and bright specular."""
@@ -169,7 +303,7 @@ def _detect_eye_info(front_image_pil):
                 lum = patch.mean(axis=2)
                 mask = (lum > 35) & (lum < 190)  # skip pupil (dark) and specular (bright)
                 if mask.sum() > 8:
-                    return tuple(patch[mask].mean(axis=0).clip(0, 255).astype(int))
+                    return tuple(int(v) for v in patch[mask].mean(axis=0).clip(0, 255))
                 return (80, 55, 35)  # fallback dark brown
 
             info = {
@@ -459,7 +593,50 @@ def _extract_uv_from_glb_binary(glb_path):
 
 # ── Trellis2BlenderSmartUV ────────────────────────────────────────────────────
 
+_STAGE = {"t": None, "label": None}
+
+
+def _stage(label=None):
+    """Print how long the previous named stage took. Call with None to flush the last one.
+
+    The bake is ~15 min across 7 Blender/Python subprocesses and nothing said where the time
+    went, so every speed decision was guesswork. This makes the cost of each stage explicit.
+    """
+    import time as _t
+    _now = _t.perf_counter()
+    if _STAGE["t"] is not None:
+        print(f"[stage] {_STAGE['label']} took {_now - _STAGE['t']:.1f}s", flush=True)
+    _STAGE["t"] = None if label is None else _now
+    _STAGE["label"] = label
+
+
 class Trellis2BlenderSmartUV:
+    # ── Re-run when one of the external Blender scripts changes ──────────────────
+    # ComfyUI caches by node INPUTS, so an edit to gen_seams.py / pelvis_graft.py is
+    # invisible to it: the cached output is reused and the fix silently never runs.
+    # A restart is the only alternative, and it wipes the whole cache -- forcing the
+    # ~7 min geometry chain and ~3 min Qwen pass to re-run for a one-line script edit.
+    # Hashing the scripts' mtimes invalidates exactly this node and its downstream.
+    @classmethod
+    def IS_CHANGED(cls, **kwargs):
+        import os as _o
+        _uv = r"C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/uv_transfer"
+        _hg = r"C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/custom_nodes/ComfyUI-HandGraft"
+        _paths = [_o.path.join(_uv, f) for f in ("gen_seams.py", "_gs_facebridge.py",
+                                                 "_gs_hairline_bridge.py", "export_glb.py")]
+        _paths += [_o.path.join(_hg, f) for f in ("pelvis_graft.py", "genital_texture.py",
+                                                  "hand_graft_post.py", "hand_replace.py")]
+        # the donor ASSETS matter as much as the code: repairing the .npz without touching a .py
+        # would otherwise serve a cached graft and look like the fix did nothing
+        _paths += [_o.path.join(_hg, "assets", f) for f in ("donor_pelvis_v2.npz",
+                                                            "genital_donor_zones.npy",
+                                                            "donor_geo_R.npz", "donor_geo_L.npz")]
+        try:
+            return str([(_o.path.basename(p), _o.path.getmtime(p))
+                        for p in _paths if _o.path.exists(p)])
+        except Exception:
+            return float("nan")
+
     """
     Blender 5.1 headless pipeline:
       1. Import GLB
@@ -521,6 +698,47 @@ class Trellis2BlenderSmartUV:
         import trimesh as trimesh_lib
         import trimesh.visual.texture as tex_vis
 
+        # ── MESH SANITY: FAIL FAST ────────────────────────────────────────────────────
+        # The generated mesh is occasionally degenerate, and every stage after this point is
+        # expensive: pelvis graft (~3 min), gen_seams (~1 min), genital texturing, export, then
+        # the whole projection. Twice today a broken mesh burned ~20 minutes before anything
+        # noticed. Both were obvious the instant the mesh arrived:
+        #   * flat pancake: extents X 1.150, Y 0.028, Z 0.016 -- smallest 2.4% of largest
+        #   * blown-up:     wrists at -3.35e18, i.e. non-finite-scale coordinates
+        # The test is a physical statement, not a tuned threshold: a humanoid body cannot have a
+        # bounding-box extent smaller than 5% of its largest (a real one measures ~19%: depth 0.21
+        # against height 1.09). Everything is relative to the mesh's own size, so it holds for any
+        # character at any scale. TRELLIS_MESH_SANITY=0 disables.
+        try:
+            import numpy as _np_ms, os as _os_ms
+            if _os_ms.environ.get("TRELLIS_MESH_SANITY", "1").strip() != "0":
+                _mv = _np_ms.asarray(trimesh.vertices, dtype=_np_ms.float64)
+                if _mv.size:
+                    _finite = bool(_np_ms.isfinite(_mv).all())
+                    _ext = _mv.max(axis=0) - _mv.min(axis=0) if _finite else None
+                    _mx = float(_ext.max()) if _finite else 0.0
+                    _mn = float(_ext.min()) if _finite else 0.0
+                    _ratio = (_mn / _mx) if _mx > 1e-12 else 0.0
+                    _bad = (not _finite) or _mx <= 1e-9 or _ratio < 0.05
+                    print("[MeshSanity] extents "
+                          + (str([round(float(e), 4) for e in _ext]) if _finite else "NON-FINITE")
+                          + f"  min/max={_ratio:.4f}  faces={len(trimesh.faces):,}"
+                          + ("  -- OK" if not _bad else "  -- DEGENERATE"))
+                    if _bad:
+                        raise RuntimeError(
+                            "[MeshSanity] ABORTING: the generated mesh is degenerate"
+                            + ("  (non-finite vertex coordinates)" if not _finite else
+                               f"  (smallest bounding-box extent is {100*_ratio:.1f}% of the largest;"
+                               f" a human body is ~19%). extents="
+                               f"{[round(float(e), 4) for e in _ext]}")
+                            + ". Stopped before the graft, gen_seams and projection rather than"
+                            + " spending ~15 more minutes on it. Re-run to draw a new mesh, or set"
+                            + " TRELLIS_MESH_SANITY=0 to force it through.")
+        except RuntimeError:
+            raise
+        except Exception as _mse:
+            print(f"[MeshSanity] check skipped: {_mse!r}")
+
         mesh = copy.deepcopy(trimesh)
 
         tmp_dir = tempfile.mkdtemp()
@@ -540,19 +758,9 @@ class Trellis2BlenderSmartUV:
         do_gen_seams         = (uv_method == "gen_seams")
         do_blender_uv        = do_template_transfer or do_smart_uv
 
-        # ── GREEN-BORDER hairline (KAN-9): save the HIGH-RES input mesh ────────────
-        # gen_seams runs on the decimated mesh, too coarse for a clean path3 hairline. The green-border
-        # bridge (run below, after gen_seams) computes the hairline on THIS dense un-decimated mesh and
-        # transfers it onto gen_seams' faces. Save it now (Y-up, before decimation) for the bridge.
-        if do_gen_seams:
-            try:
-                import numpy as _np_hr
-                _np_hr.savez(r"C:\applications\ComfyUI_windows_portable_nvidia\ComfyUI_windows_portable\ComfyUI\uv_transfer\_gs_hires.npz",
-                             co=_np_hr.asarray(mesh.vertices, dtype=_np_hr.float32),
-                             fv=_np_hr.asarray(mesh.faces, dtype=_np_hr.int64))
-                print(f"[BlenderSmartUV] green-border: saved high-res mesh ({len(mesh.vertices)} verts) for the hairline bridge")
-            except Exception as _hre:
-                print(f"[BlenderSmartUV] green-border: failed to save high-res mesh ({_hre!r}); bridge will fall back to the fixture")
+        # GREEN-BORDER high-res save REMOVED (2026-09-04): it existed only to feed the
+        # hairline bridge (pass D1), which is retired now that we generate real back/side
+        # views. Nothing reads _gs_hires.npz any more.
 
         if do_template_transfer:
             print(f"[BlenderSmartUV] Template transfer mode — source: {template_path}")
@@ -581,7 +789,11 @@ print(f"[BlenderSmartUV] Imported: {{len(obj.data.vertices)}} verts, {{len(obj.d
 
 # ── Remesh / Decimate ─────────────────────────────────────────────────────────
 current_faces = len(obj.data.polygons)
-target = {target_faces}
+import os as _os_tgt   # local: _os is not imported until much later in this script
+# GS_TARGET_SCALE lets the mesh-prep retry loop ask for a slightly different density,
+# so a retry produces a genuinely different mesh instead of repeating the same failure.
+target = int(round({target_faces} * float(_os_tgt.environ.get("GS_TARGET_SCALE", "1.0"))))
+print(f"[BlenderSmartUV] face target {{target}} (scale {{_os_tgt.environ.get('GS_TARGET_SCALE','1.0')}})")
 if {do_gen_seams}:   # VOXEL REMESH sized straight to `target` -> smooth, EVEN QUAD body. This is the exact
     # pre-2026-06-17-18:12 behavior (last-good run = 157k QUADS, smooth). Turning it off on 06-17 (and my
     # later fine-voxel+decimate) produced a TRIANGLE mesh (raw decimated Dual-Contouring / collapse slivers)
@@ -593,10 +805,24 @@ if {do_gen_seams}:   # VOXEL REMESH sized straight to `target` -> smooth, EVEN Q
     _diag = _math.sqrt(sum(d * d for d in _dims))
     _vox = max(0.002, _diag * 0.006)
     print(f"[BlenderSmartUV] Voxel remesh start — diag={{_diag:.3f}}, initial voxel={{_vox:.5f}}, target={{target}}")
+    # The old rule was  _vox *= (nf/target) ** 0.5,  i.e. a fixed-point iteration assuming face
+    # count scales as voxel**-2. It does not: measured on a real bake, 0.00337 -> 77k and
+    # 0.00239 -> 298k, which is voxel**-3.9. With the wrong exponent every step overshoots, so the
+    # search ping-ponged between 70k and 320k for eight attempts, never tried the interval where
+    # 150k actually lives, and then APPLIED THE LAST attempt (320k = 2.1x budget) instead of the
+    # closest one. That mesh unwraps into broken island scales (one face owning 2.3% of the atlas)
+    # and the bake is unusable. Now: bracket the target and bisect, measure the exponent from the
+    # last two samples instead of assuming it, keep the BEST attempt, and refuse to continue if it
+    # never converges.
+    _samples = []
+    _best = None          # (log-error, voxel, faces)
+    _too_big = None       # a voxel that produced TOO FEW faces
+    _too_small = None     # a voxel that produced TOO MANY faces
     _last_mod = None
-    for _attempt in range(8):
+    for _attempt in range(10):
         if _last_mod is not None:
             obj.modifiers.remove(_last_mod)
+            _last_mod = None
         _mod = obj.modifiers.new(name='VoxRemesh', type='REMESH')
         _mod.mode = 'VOXEL'
         _mod.voxel_size = _vox
@@ -604,11 +830,51 @@ if {do_gen_seams}:   # VOXEL REMESH sized straight to `target` -> smooth, EVEN Q
         _dg = bpy.context.evaluated_depsgraph_get()
         _ev = obj.evaluated_get(_dg)
         _nf = len(_ev.data.polygons)
-        print(f"[BlenderSmartUV]   attempt {{_attempt}}: voxel={{_vox:.5f}} → {{_nf}} faces")
+        _samples.append((_vox, _nf))
+        _err = abs(_math.log(max(_nf, 1) / float(target)))
+        if _best is None or _err < _best[0]:
+            _best = (_err, _vox, _nf)
+        print(f"[BlenderSmartUV]   attempt {{_attempt}}: voxel={{_vox:.5f}} -> {{_nf}} faces")
+        _last_mod = _mod
         if abs(_nf - target) < target * 0.10:
             break
-        _vox = max(0.001, _vox * (_nf / target) ** 0.5)
-        _last_mod = _mod
+        if _nf < target:
+            if _too_big is None or _vox < _too_big:
+                _too_big = _vox
+        else:
+            if _too_small is None or _vox > _too_small:
+                _too_small = _vox
+        if _too_big is not None and _too_small is not None:
+            _nv = _math.sqrt(_too_big * _too_small)      # geometric bisection inside the bracket
+        else:
+            _p = 2.0                                     # measure the exponent, do not assume it
+            if len(_samples) >= 2:
+                (_v1, _n1), (_v2, _n2) = _samples[-2], _samples[-1]
+                if _v1 > 0 and _v2 > 0 and _n1 > 0 and _n2 > 0 and abs(_v2 - _v1) > 1e-12:
+                    try:
+                        _p = abs(_math.log(float(_n2) / _n1) / _math.log(_v2 / _v1))
+                    except Exception:
+                        _p = 2.0
+                _p = min(6.0, max(1.0, _p))
+            _nv = _vox * (float(_nf) / target) ** (1.0 / _p)
+        _nv = max(0.001, min(0.05, _nv))
+        if abs(_nv - _vox) <= 1e-9:
+            break
+        _vox = _nv
+    for _m in [_m2 for _m2 in obj.modifiers if _m2.name.startswith('VoxRemesh')]:
+        obj.modifiers.remove(_m)
+    if not (target * 0.55 <= _best[2] <= target * 1.60):
+        raise RuntimeError(
+            "[BlenderSmartUV] VOXEL REMESH DID NOT CONVERGE: best attempt {{}} faces vs target "
+            "{{}}. Tried {{}}. Aborting HERE rather than unwrapping and texturing a mesh of the "
+            "wrong density - that produces broken UV island scales and an unusable bake."
+            .format(_best[2], target,
+                    ", ".join("%.5f->%d" % (_v, _n) for _v, _n in _samples)))
+    _mod = obj.modifiers.new(name='VoxRemesh', type='REMESH')
+    _mod.mode = 'VOXEL'
+    _mod.voxel_size = _best[1]
+    _mod.adaptivity = 0.0
+    print(f"[BlenderSmartUV] applying BEST voxel={{_best[1]:.5f}} (~{{_best[2]}} faces, target {{target}})")
     bpy.ops.object.modifier_apply(modifier='VoxRemesh')
     print(f"[BlenderSmartUV] After voxel remesh: {{len(obj.data.vertices)}} verts, {{len(obj.data.polygons)}} faces")
 elif current_faces > target:
@@ -697,7 +963,21 @@ for start_face in bm_clean.faces:
                     stack.append(adj)
     components_f.append(comp)
 
-faces_to_kill = {{fi for comp in components_f if len(comp) < min_component_faces for fi in comp}}
+# KEEP ONLY THE LARGEST SHELL.
+# The 0.1% floor above only catches decimation splinters. Multi-view TRELLIS can also
+# hallucinate a whole DETACHED limb where the views disagree -- measured on the first
+# 4-view bake: a second component of 8,254 verts (4.9% of the mesh), a thin object
+# hanging between the legs ("the third leg"). It sits INSIDE the body's bounding box,
+# so no spatial test finds it; only "is not the main shell" does. The character body is
+# one closed shell, so anything else is an artefact.
+components_f.sort(key=len, reverse=True)
+faces_to_kill = {{fi for comp in components_f[1:] for fi in comp}}
+for _c in components_f[1:]:
+    _pct = 100.0 * len(_c) / max(total_faces, 1)
+    print(f"[BlenderSmartUV] dropping detached component: {{len(_c)}} faces ({{_pct:.2f}}% of mesh)")
+    if _pct > 1.0:
+        print(f"[BlenderSmartUV] *** LARGE detached piece removed ({{_pct:.2f}}%) -- "
+              f"confirm it was not real geometry ***")
 if faces_to_kill:
     geom = [f for f in bm_clean.faces if f.index in faces_to_kill]
     bmesh.ops.delete(bm_clean, geom=geom, context='FACES')
@@ -1581,201 +1861,281 @@ if not _os.path.exists(r'{out_obj}'):
 print("[BlenderSmartUV] Export done:", r'{out_obj}')
 """
 
-        script_path = os.path.join(tmp_dir, "uv_unwrap.py")
-        with open(script_path, "w", encoding="utf-8") as f:
-            f.write(blender_script)
-
-        uv_layout_png = os.path.join(tmp_dir, "uv_layout.png")
-        print("[BlenderSmartUV] Running Blender 5.1 headlessly...")
-        result = subprocess.run(
-            [BLENDER_EXE, "--background", "--python", script_path],
-            capture_output=True, text=True, timeout=600,
-            encoding='utf-8', errors='replace'
-        )
-        for line in (result.stdout or "").splitlines():
-            if "[BlenderSmartUV]" in line or "[SeamBands]" in line or "ERROR" in line.upper() or "WARNING" in line.upper():
-                print(line)
-        if result.returncode != 0:
-            print("[BlenderSmartUV] STDERR:", result.stderr[-3000:])
-            raise RuntimeError(f"Blender exited with code {result.returncode}")
-
-        # ── gen_seams: run gen_seams.py then export_glb.py as extra subprocesses ─
-        _UV_TRANSFER_DIR = r"C:\applications\ComfyUI_windows_portable_nvidia\ComfyUI_windows_portable\ComfyUI\uv_transfer"
-        _LAST_SEAMS_BLEND = os.path.join(_UV_TRANSFER_DIR, "last_seams.blend")
-        _LAST_SEAMS_GLB   = os.path.join(_UV_TRANSFER_DIR, "last_seams.glb")
-
-        if do_gen_seams:
-            import sys as _sys
-            _GS = os.path.join(_UV_TRANSFER_DIR, "gen_seams.py")
-            _BRIDGE = os.path.join(_UV_TRANSFER_DIR, "_gs_facebridge.py")
-            # ── PELVIS GRAFT (KAN-18) ────────────────────────────────────────────
-            # Graft the high-detail donor genital onto the ALREADY-REMESHED body in last_seams.blend, in
-            # place, BEFORE gen_seams UVs it. Trellis produces no genital, and the target voxel remesh would
-            # destroy genital detail -> so we graft AFTER the remesh (never re-remeshed) and let gen_seams UV
-            # the grafted mesh. LOCAL mode keeps the body's quads untouched and adds only the dense donor
-            # patch (~+25k faces, body stays lean -- no whole-body fuse/densify). The surround SMOOTH is the
-            # GPU sculpt (headless numpy Taubin welted/striated), which needs a VIEW_3D -> WINDOWED Blender
-            # launched OFF-SCREEN (-p 8000 8000) so it never shows + foreground-lock so it can't steal focus;
-            # intermittent GPU crash -> 3x retry. Non-fatal (warn + continue without the genital on failure).
-            # Toggle: env PELVIS_GRAFT=0 to disable.
-            _PELVIS_ENABLED = os.environ.get("PELVIS_GRAFT", "1") != "0"
-            _PELVIS_GRAFT = r"C:\applications\ComfyUI_windows_portable_nvidia\ComfyUI_windows_portable\ComfyUI\custom_nodes\ComfyUI-HandGraft\pelvis_graft.py"
-            if _PELVIS_ENABLED and os.path.exists(_PELVIS_GRAFT):
-                print("[BlenderSmartUV] PELVIS GRAFT: grafting genital onto the remeshed body (headless)...")
-                _pv_si = None; _pv_u = None; _pv_old = None
-                if os.name == "nt":
-                    import ctypes as _ctypes
-                    _pv_si = subprocess.STARTUPINFO(); _pv_si.dwFlags |= subprocess.STARTF_USESHOWWINDOW; _pv_si.wShowWindow = 7
-                    try:
-                        _pv_u = _ctypes.windll.user32; _pv_buf = _ctypes.c_uint()
-                        _pv_u.SystemParametersInfoW(0x2000, 0, _ctypes.byref(_pv_buf), 0); _pv_old = _pv_buf.value
-                        _pv_u.SystemParametersInfoW(0x2001, 0, _ctypes.c_void_p(300000), 0)
-                    except Exception:
-                        _pv_u = None
-                _pv_cmd = [BLENDER_EXE, "--background", "--python", _PELVIS_GRAFT,
-                           "--", "--in_blend", _LAST_SEAMS_BLEND]
-                try:
-                    _pv_ok = False; _pv_r = None
-                    for _pv_try in range(3):
-                        _pv_r = subprocess.run(_pv_cmd, capture_output=True, text=True, startupinfo=_pv_si,
-                                               encoding='utf-8', errors='replace', timeout=900)
-                        if "done (pipeline)" in (_pv_r.stdout or ""):
-                            _pv_ok = True
-                            for _l in (_pv_r.stdout or "").splitlines():
-                                if "[pelvis_graft]" in _l:
-                                    print("  " + _l)
-                            break
-                        print(f"[BlenderSmartUV] PELVIS GRAFT crash/retry {_pv_try + 1} (rc={_pv_r.returncode})")
-                    if not _pv_ok:
-                        print("[BlenderSmartUV] WARNING: PELVIS GRAFT failed after retries -- continuing WITHOUT the genital.")
-                        print((_pv_r.stdout or "")[-1500:], (_pv_r.stderr or "")[-800:])
-                finally:
-                    if _pv_u is not None and _pv_old is not None:
-                        try: _pv_u.SystemParametersInfoW(0x2001, 0, _ctypes.c_void_p(int(_pv_old)), 0x02)
-                        except Exception: pass
-                # GENITAL TEXTURING runs LATER -- after gen_seams D2, where the body UVMap exists (see below).
-            # ── FACE BRIDGE (KAN-9) ──────────────────────────────────────────────
-            # gen_seams runs in Blender (no MediaPipe). 3-step bridge gives it a robust
-            # per-character face region for the face UV chart: (A) gen_seams exports the
-            # mesh, (B) python_embeded runs MediaPipe, (C) gen_seams unwraps using it.
-            # ANY failure → gen_seams falls back to its geometric face region.
-            for _f in ("_gs_faceregion.npy", "_gs_facemesh.npz"):
-                try: os.remove(os.path.join(_UV_TRANSFER_DIR, _f))
-                except OSError: pass
-            print("[BlenderSmartUV] FACE BRIDGE (A) export mesh for MediaPipe...")
-            subprocess.run(
-                [BLENDER_EXE, _LAST_SEAMS_BLEND, "--background", "--python", _GS],
-                env=dict(os.environ, GS_FACE_EXPORT="1"),
-                capture_output=True, text=True, timeout=300, encoding='utf-8', errors='replace')
-            print("[BlenderSmartUV] FACE BRIDGE (B) MediaPipe face detection...")
-            r_br = subprocess.run(
-                [_sys.executable, _BRIDGE],
-                capture_output=True, text=True, timeout=300, encoding='utf-8', errors='replace')
-            for line in (r_br.stdout or "").splitlines():
-                if "face-bridge" in line or "FaceRegion" in line:
-                    print(f"  [face-bridge] {line}")
-
-            # ── gen_seams pass C: DUMP-ONLY (is_hair + _genseams_viz, exits before UV; NO save) ───────
-            # Feeds the green-border bridge. Does NOT save last_seams, so the single full pass below is
-            # the ONLY UV/seam pass -> gen_seams runs once -> no double-run geometry corruption.
-            print("[BlenderSmartUV] gen_seams (C, dump-only) compute hair region for green-border bridge...")
-            r_gs = subprocess.run(
-                [BLENDER_EXE, _LAST_SEAMS_BLEND, "--background", "--python", _GS],
-                env=dict(os.environ, GS_DUMP_VIZ="1"),
-                capture_output=True, text=True, timeout=600, encoding='utf-8', errors='replace')
-            for line in (r_gs.stdout or "").splitlines():
-                print(f"  [gen_seams-C] {line}")
-            if r_gs.returncode != 0:
-                print("[BlenderSmartUV] gen_seams (C) STDERR:", (r_gs.stderr or "")[-2000:])
-                raise RuntimeError(f"gen_seams.py (dump) failed (code {r_gs.returncode})")
-
-            # ── GREEN-BORDER bridge (D1): path3 hairline on the DENSE fixture mesh -> _gs_ishair ───────
-            # No GS_HIRES => the bridge uses the dense 149k texturing fixture (path3 needs that density;
-            # the coarse 73k input tangles). Any failure just means no _gs_ishair, and the pass below
-            # falls back to gen_seams' own hairline. The bridge does NOT touch geometry.
-            _gbridge = os.path.join(_UV_TRANSFER_DIR, "_gs_hairline_bridge.py")
-            _ishair  = os.path.join(_UV_TRANSFER_DIR, "_gs_ishair.npy")
-            try: os.remove(_ishair)
-            except OSError: pass
+        # -- MESH-PREP RETRY -----------------------------------------------------
+        # Everything above this point -- Qwen view generation and the Trellis mesh, ~7 minutes
+        # of the run -- is already done by the time mesh prep can fail. Throwing that away and
+        # making the user re-queue the whole prompt is pure waste, so retry the mesh-prep block
+        # in place instead. Each attempt nudges the voxel face target: repeating a deterministic
+        # step on identical input just reproduces the same failure, so the mesh has to actually
+        # differ for a retry to mean anything.
+        _MP_SCALES = (1.00, 0.93, 1.08, 0.86, 1.15)
+        for _mp_try in range(len(_MP_SCALES)):
+            os.environ["GS_TARGET_SCALE"] = str(_MP_SCALES[_mp_try])
+            if _mp_try:
+                print(f"[BlenderSmartUV] === MESH-PREP RETRY {_mp_try + 1}/{len(_MP_SCALES)} "
+                      f"(face target x{_MP_SCALES[_mp_try]}) - reusing the generated images and "
+                      f"the Trellis mesh; only mesh prep re-runs ===")
             try:
-                print("[BlenderSmartUV] GREEN-BORDER (D1) compute hairline on dense fixture mesh...")
-                r_gb = subprocess.run(
-                    [_sys.executable, _gbridge],
-                    env=dict(os.environ, GB_RENDER="0"),
-                    capture_output=True, text=True, timeout=600, encoding='utf-8', errors='replace')
-                for line in (r_gb.stdout or "").splitlines():
-                    if "gs-bridge" in line or "green border" in line:
-                        print(f"  [green-border] {line}")
-                _gb_err = (r_gb.stderr or "")
-            except Exception as _gbe:
-                _gb_err = repr(_gbe)
-            # HARD STOP -- never silently ship gen_seams' own (zigzag) hairline. If the green border
-            # failed this run (intermittent degenerate graft), STOP so a bad hairline can't reach the FBX.
-            if not os.path.exists(_ishair):
-                print("[BlenderSmartUV] green-border STDERR:", _gb_err[-2000:])
-                raise RuntimeError("green-border produced no _gs_ishair -- refusing to fall back to gen_seams' "
-                                   "own hairline. Re-run (this run's graft was likely degenerate).")
+                script_path = os.path.join(tmp_dir, "uv_unwrap.py")
+                with open(script_path, "w", encoding="utf-8") as f:
+                    f.write(blender_script)
 
-            # ── gen_seams pass D2: the SINGLE full pass (UV + seam + save). Overrides is_hair with the
-            # green border if _gs_ishair exists, else uses gen_seams' own. ─────────────────────────────
-            print("[BlenderSmartUV] gen_seams (D2, single full pass) UV + seam + save...")
-            r_gs2 = subprocess.run(
-                [BLENDER_EXE, _LAST_SEAMS_BLEND, "--background", "--python", _GS],
-                env=dict(os.environ, GS_USE_ISHAIR="1"),
-                capture_output=True, text=True, timeout=600, encoding='utf-8', errors='replace')
-            for line in (r_gs2.stdout or "").splitlines():
-                print(f"  [gen_seams-D2] {line}")
-            if r_gs2.returncode != 0:
-                print("[BlenderSmartUV] gen_seams (D2) STDERR:", (r_gs2.stderr or "")[-2000:])
-                raise RuntimeError(f"gen_seams.py (D2) failed (code {r_gs2.returncode})")
+                uv_layout_png = os.path.join(tmp_dir, "uv_layout.png")
+                _stage("blender main (voxel remesh + export)")
+                print("[BlenderSmartUV] Running Blender 5.1 headlessly...")
+                result = subprocess.run(
+                    # --python-exit-code: without it Blender exits 0 even when the script raises, so a
+                    # hard failure inside the script is silently swallowed and the bake carries on.
+                    [BLENDER_EXE, "--background", "--python-exit-code", "1", "--python", script_path],
+                    capture_output=True, text=True, timeout=600,
+                    encoding='utf-8', errors='replace'
+                )
+                for line in (result.stdout or "").splitlines():
+                    if "[BlenderSmartUV]" in line or "[SeamBands]" in line or "ERROR" in line.upper() or "WARNING" in line.upper():
+                        print(line)
+                if result.returncode != 0:
+                    print("[BlenderSmartUV] STDERR:", result.stderr[-3000:])
+                    raise RuntimeError(f"Blender exited with code {result.returncode}")
 
-            # ── GENITAL TEXTURING (KAN-18, approach B / hair-style) ──────────────────────
-            # Body UVMap now exists (gen_seams D2 just saved last_seams.blend). Bake the genital zone maps onto
-            # the body atlas UV -- NO mesh change, just 3 PNGs in uv_transfer/genital_tex. The FBXExport step
-            # then adds a 'Genital' material on slot 2 sampling them (like the Hair material). Non-fatal.
-            # ON by default (env GENITAL_TEX=0 to disable). Safe: separate slot-2 material, non-fatal,
-            # never touches the body material/UV.
-            _GT_OUT = os.path.join(_UV_TRANSFER_DIR, "genital_tex")
-            import shutil as _shutil
-            try: _shutil.rmtree(_GT_OUT)                 # clear stale maps so the FBX material only fires on fresh ones
-            except Exception: pass
-            if os.environ.get("GENITAL_TEX", "1") != "0":
-                _GT_PY = r'C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/custom_nodes/ComfyUI-HandGraft/genital_texture.py'
-                print("[BlenderSmartUV] GENITAL TEXTURING (headless): bake albedo/roughness/normal onto body UV...")
-                try:
-                    _gt_r = subprocess.run([BLENDER_EXE, "--background", "--python", _GT_PY, "--",
-                                            _LAST_SEAMS_BLEND, _GT_OUT],
-                                           capture_output=True, text=True, timeout=600,
-                                           encoding='utf-8', errors='replace')
-                    if "RESULT" in (_gt_r.stdout or ""):
-                        for _l in (_gt_r.stdout or "").splitlines():
-                            if "RESULT" in _l:
-                                print("  [genital] " + _l)
-                    else:
-                        print("[BlenderSmartUV] WARNING: GENITAL TEXTURING failed -- continuing without it.")
-                        print((_gt_r.stdout or "")[-1200:], (_gt_r.stderr or "")[-600:])
-                except Exception as _gte:
-                    print(f"[BlenderSmartUV] GENITAL TEXTURING error (non-fatal): {_gte}")
+                # ── gen_seams: run gen_seams.py then export_glb.py as extra subprocesses ─
+                _UV_TRANSFER_DIR = r"C:\applications\ComfyUI_windows_portable_nvidia\ComfyUI_windows_portable\ComfyUI\uv_transfer"
+                _LAST_SEAMS_BLEND = os.path.join(_UV_TRANSFER_DIR, "last_seams.blend")
+                _LAST_SEAMS_GLB   = os.path.join(_UV_TRANSFER_DIR, "last_seams.glb")
 
-            print("[BlenderSmartUV] Exporting last_seams.glb...")
-            r_ex = subprocess.run(
-                [BLENDER_EXE, _LAST_SEAMS_BLEND, "--background", "--python",
-                 os.path.join(_UV_TRANSFER_DIR, "export_glb.py")],
-                capture_output=True, text=True, timeout=120,
-                encoding='utf-8', errors='replace'
-            )
-            for line in (r_ex.stdout or "").splitlines():
-                print(f"  [export_glb] {line}")
-            if r_ex.returncode != 0:
-                raise RuntimeError(f"export_glb.py failed (code {r_ex.returncode})")
+                if do_gen_seams:
+                    import sys as _sys
+                    _GS = os.path.join(_UV_TRANSFER_DIR, "gen_seams.py")
+                    _BRIDGE = os.path.join(_UV_TRANSFER_DIR, "_gs_facebridge.py")
+                    # ── HAND RE-GRAFT (post-remesh) ──────────────────────────────────────
+                    # ReplaceHandsWithDonor (pre-remesh) grafts the donor hands at 5x the body's
+                    # resolution, and the target voxel remesh above -- being a UNIFORM-resolution
+                    # operation -- then equalises them back down to body resolution. Measured on a
+                    # real bake: leaving the graft node, hand edge 0.00111 vs body 0.00556 (0.20x);
+                    # after the remesh, 0.00247 vs 0.00247 (1.00x). Of the donor's 7,432 triangles
+                    # per hand, ~614 polygons survived. The pre-remesh graft is still needed (it is
+                    # what makes the body watertight going INTO the remesh) -- so rather than move
+                    # it, cut the voxelised hands off and bridge fresh full-res donor hands on here,
+                    # in the same post-remesh slot the genital already uses for the same reason.
+                    # Measured on _pregraft.blend: hands 2,399 -> 13,840 polys, edge ratio 1.04 ->
+                    # 0.61, 0 boundary / 0 non-manifold edges, body quads untouched.
+                    # MUST run BEFORE the pelvis graft: pelvis writes _gs_isgenital.npy as face
+                    # indices into the mesh as it stands when IT finishes, so anything that adds
+                    # faces afterwards would leave that flag pointing at the wrong faces.
+                    # ON by default. It was briefly defaulted off so it would not ride along with the
+                    # Trellis-texture change, and the consequence was shipping the voxel-flattened
+                    # hands again (~614 polygons per hand out of the donor's 7,432) -- which is the
+                    # whole defect this stage exists to fix. Disable with env HAND_GRAFT_POST=0.
+                    _HGP_ENABLED = os.environ.get("HAND_GRAFT_POST", "0") == "1"
+                    _HAND_GRAFT_POST = os.path.join(
+                        r"C:\applications\ComfyUI_windows_portable_nvidia\ComfyUI_windows_portable\ComfyUI"
+                        r"\custom_nodes\ComfyUI-HandGraft", "hand_graft_post.py")
+                    if _HGP_ENABLED and os.path.exists(_HAND_GRAFT_POST):
+                        _stage("hand re-graft")
+                        print("[BlenderSmartUV] HAND RE-GRAFT: full-res donor hands onto the remeshed body...")
+                        try:
+                            import shutil as _sh
+                            _sh.copyfile(_LAST_SEAMS_BLEND,
+                                         os.path.join(_UV_TRANSFER_DIR, "_prehandgraft.blend"))
+                        except Exception as _hge:
+                            print(f"[BlenderSmartUV] pre-hand-graft snapshot failed ({_hge!r})")
+                        # Fully headless: a wrist is a near-circular tube, so this needs no GPU
+                        # sculpt and none of the windowed/off-screen dance the pelvis graft needs.
+                        _hg_r = subprocess.run(
+                            [BLENDER_EXE, "--background", "--python", _HAND_GRAFT_POST,
+                             "--", "--in_blend", _LAST_SEAMS_BLEND],
+                            capture_output=True, text=True, encoding='utf-8', errors='replace',
+                            timeout=600)
+                        if "done (pipeline)" in (_hg_r.stdout or ""):
+                            for _l in (_hg_r.stdout or "").splitlines():
+                                if "[hand_graft_post]" in _l:
+                                    print("  " + _l)
+                        else:
+                            # Non-fatal, like the pelvis: the body still has its (coarse) remeshed
+                            # hands, so the bake completes -- it just does not get the detail back.
+                            print("[BlenderSmartUV] WARNING: HAND RE-GRAFT failed -- continuing with "
+                                  "the remeshed (coarse) hands.")
+                            print((_hg_r.stdout or "")[-1500:], (_hg_r.stderr or "")[-800:])
+                    # ── PELVIS GRAFT (KAN-18) ────────────────────────────────────────────
+                    # Graft the high-detail donor genital onto the ALREADY-REMESHED body in last_seams.blend, in
+                    # place, BEFORE gen_seams UVs it. Trellis produces no genital, and the target voxel remesh would
+                    # destroy genital detail -> so we graft AFTER the remesh (never re-remeshed) and let gen_seams UV
+                    # the grafted mesh. LOCAL mode keeps the body's quads untouched and adds only the dense donor
+                    # patch (~+25k faces, body stays lean -- no whole-body fuse/densify). The surround SMOOTH is the
+                    # GPU sculpt (headless numpy Taubin welted/striated), which needs a VIEW_3D -> WINDOWED Blender
+                    # launched OFF-SCREEN (-p 8000 8000) so it never shows + foreground-lock so it can't steal focus;
+                    # intermittent GPU crash -> 3x retry. Non-fatal (warn + continue without the genital on failure).
+                    # Toggle: env PELVIS_GRAFT=0 to disable.
+                    _PELVIS_ENABLED = os.environ.get("PELVIS_GRAFT", "1") != "0"
+                    _PELVIS_GRAFT = r"C:\applications\ComfyUI_windows_portable_nvidia\ComfyUI_windows_portable\ComfyUI\custom_nodes\ComfyUI-HandGraft\pelvis_graft.py"
+                    if _PELVIS_ENABLED and os.path.exists(_PELVIS_GRAFT):
+                        _stage("pelvis graft")
+                        print("[BlenderSmartUV] PELVIS GRAFT: grafting genital onto the remeshed body (headless)...")
+                        # Snapshot the PRE-graft blend. The graft edits last_seams.blend in place and
+                        # gen_seams then overwrites it, so the input state is destroyed every bake and the
+                        # graft can only be debugged by re-baking. With this, pelvis_graft.py --in_blend
+                        # can be replayed against the exact same body in seconds.
+                        try:
+                            import shutil as _sh
+                            _pre = os.path.join(_UV_TRANSFER_DIR, "_pregraft.blend")
+                            _sh.copyfile(_LAST_SEAMS_BLEND, _pre)
+                            print(f"[BlenderSmartUV] pre-graft snapshot -> {_pre}")
+                        except Exception as _pge:
+                            print(f"[BlenderSmartUV] pre-graft snapshot failed ({_pge!r})")
+                        _pv_si = None; _pv_u = None; _pv_old = None
+                        if os.name == "nt":
+                            import ctypes as _ctypes
+                            _pv_si = subprocess.STARTUPINFO(); _pv_si.dwFlags |= subprocess.STARTF_USESHOWWINDOW; _pv_si.wShowWindow = 7
+                            try:
+                                _pv_u = _ctypes.windll.user32; _pv_buf = _ctypes.c_uint()
+                                _pv_u.SystemParametersInfoW(0x2000, 0, _ctypes.byref(_pv_buf), 0); _pv_old = _pv_buf.value
+                                _pv_u.SystemParametersInfoW(0x2001, 0, _ctypes.c_void_p(300000), 0)
+                            except Exception:
+                                _pv_u = None
+                        _pv_cmd = [BLENDER_EXE, "--background", "--python", _PELVIS_GRAFT,
+                                   "--", "--in_blend", _LAST_SEAMS_BLEND]
+                        try:
+                            _pv_ok = False; _pv_r = None
+                            for _pv_try in range(3):
+                                _pv_r = subprocess.run(_pv_cmd, capture_output=True, text=True, startupinfo=_pv_si,
+                                                       encoding='utf-8', errors='replace', timeout=900)
+                                if "done (pipeline)" in (_pv_r.stdout or ""):
+                                    _pv_ok = True
+                                    for _l in (_pv_r.stdout or "").splitlines():
+                                        # [cutjoin] carries the rim-snap / spacing diagnostics -- the only
+                                        # numbers that say WHY a graft came out crumpled. They were being
+                                        # filtered out of every log, so the graft was undebuggable.
+                                        if any(_k in _l for _k in ("[pelvis_graft]", "[cutjoin]", "[graft]")):
+                                            print("  " + _l)
+                                    break
+                                print(f"[BlenderSmartUV] PELVIS GRAFT crash/retry {_pv_try + 1} (rc={_pv_r.returncode})")
+                            if not _pv_ok:
+                                print("[BlenderSmartUV] WARNING: PELVIS GRAFT failed after retries -- continuing WITHOUT the genital.")
+                                print((_pv_r.stdout or "")[-1500:], (_pv_r.stderr or "")[-800:])
+                        finally:
+                            if _pv_u is not None and _pv_old is not None:
+                                try: _pv_u.SystemParametersInfoW(0x2001, 0, _ctypes.c_void_p(int(_pv_old)), 0x02)
+                                except Exception: pass
+                        # GENITAL TEXTURING runs LATER -- after gen_seams D2, where the body UVMap exists (see below).
+                    # ── FACE BRIDGE (KAN-9) ──────────────────────────────────────────────
+                    # gen_seams runs in Blender (no MediaPipe). 3-step bridge gives it a robust
+                    # per-character face region for the face UV chart: (A) gen_seams exports the
+                    # mesh, (B) python_embeded runs MediaPipe, (C) gen_seams unwraps using it.
+                    # ANY failure → gen_seams falls back to its geometric face region.
+                    for _f in ("_gs_faceregion.npy", "_gs_facemesh.npz"):
+                        try: os.remove(os.path.join(_UV_TRANSFER_DIR, _f))
+                        except OSError: pass
+                    _stage("face bridge A")
+                    print("[BlenderSmartUV] FACE BRIDGE (A) export mesh for MediaPipe...")
+                    subprocess.run(
+                        [BLENDER_EXE, _LAST_SEAMS_BLEND, "--background", "--python-exit-code", "1",
+                         "--python", _GS],
+                        env=dict(os.environ, GS_FACE_EXPORT="1"),
+                        capture_output=True, text=True, timeout=300, encoding='utf-8', errors='replace')
+                    _stage("face bridge B")
+                    print("[BlenderSmartUV] FACE BRIDGE (B) MediaPipe face detection...")
+                    r_br = subprocess.run(
+                        [_sys.executable, _BRIDGE],
+                        capture_output=True, text=True, timeout=300, encoding='utf-8', errors='replace')
+                    for line in (r_br.stdout or "").splitlines():
+                        if "face-bridge" in line or "FaceRegion" in line:
+                            print(f"  [face-bridge] {line}")
 
-            blender_out = _LAST_SEAMS_GLB
-        else:
-            # OBJ for template_transfer/smart_uv (preserves UV + smoothing groups)
-            # GLB for xatlas (trimesh loads it cleanly for atlasing)
-            blender_out = out_obj if do_blender_uv else out_glb
-            if not os.path.exists(blender_out):
-                raise RuntimeError(f"Blender produced no output at {blender_out}")
+                    # ── passes C + D1 REMOVED (2026-09-04) ────────────────────────────────────────
+                    # C (dump-only is_hair) and D1 (green-border hairline on the dense fixture mesh)
+                    # existed ONLY to trace a hairline, which existed only to fence the hair off so a
+                    # FRONT-ONLY photo could be interpolated into the sides/back without bleeding.
+                    # We now generate real back/left/right views, so there is nothing to fence: the
+                    # premise is gone. They cost 2 of the 5 Blender launches per bake and the hairline
+                    # they produced was never reliable. D2 computes its own is_hair for the FBX hair
+                    # material, so the material survives.
+                    # Delete any _gs_ishair from an earlier bake: D2 OVERRIDES its hair mask with that
+                    # file if it exists, and the mesh changes every bake, so a stale one is poison.
+                    _ishair = os.path.join(_UV_TRANSFER_DIR, "_gs_ishair.npy")
+                    try:
+                        os.remove(_ishair)
+                        print("[BlenderSmartUV] removed stale _gs_ishair.npy (hairline bridge retired)")
+                    except OSError:
+                        pass
+
+                    # ── gen_seams pass D2: the SINGLE full pass (UV + seam + save). Overrides is_hair with the
+                    # green border if _gs_ishair exists, else uses gen_seams' own. ─────────────────────────────
+                    _stage("gen_seams D2")
+                    print("[BlenderSmartUV] gen_seams (D2, single full pass) UV + seam + save...")
+                    r_gs2 = subprocess.run(
+                        [BLENDER_EXE, _LAST_SEAMS_BLEND, "--background", "--python-exit-code", "1",
+                         "--python", _GS],
+                        # GS_FACE_OVAL: cut the face out as its OWN UV chart. Without it the face
+                        # merges into the 67k-face body island and ANGLE_BASED squashes the
+                        # high-curvature head to nothing -- measured on bake 034459: 5,804 face
+                        # faces got 631 texels total (a 25x25 patch), which is why the face never
+                        # textured. gen_seams:1352 predicts exactly this ("squishes to a sliver
+                        # ... no texels"). The oval costs one seam near the jaw/hairline; that is
+                        # strictly better than having no face.
+                        env=dict(os.environ, GS_USE_ISHAIR="1", GS_FACE_OVAL="1"),
+                        capture_output=True, text=True, timeout=600, encoding='utf-8', errors='replace')
+                    for line in (r_gs2.stdout or "").splitlines():
+                        print(f"  [gen_seams-D2] {line}")
+                    if r_gs2.returncode != 0:
+                        print("[BlenderSmartUV] gen_seams (D2) STDERR:", (r_gs2.stderr or "")[-2000:])
+                        raise RuntimeError(f"gen_seams.py (D2) failed (code {r_gs2.returncode})")
+
+                    # ── GENITAL TEXTURING (KAN-18, approach B / hair-style) ──────────────────────
+                    # Body UVMap now exists (gen_seams D2 just saved last_seams.blend). Bake the genital zone maps onto
+                    # the body atlas UV -- NO mesh change, just 3 PNGs in uv_transfer/genital_tex. The FBXExport step
+                    # then adds a 'Genital' material on slot 2 sampling them (like the Hair material). Non-fatal.
+                    # ON by default (env GENITAL_TEX=0 to disable). Safe: separate slot-2 material, non-fatal,
+                    # never touches the body material/UV.
+                    _GT_OUT = os.path.join(_UV_TRANSFER_DIR, "genital_tex")
+                    import shutil as _shutil
+                    try: _shutil.rmtree(_GT_OUT)                 # clear stale maps so the FBX material only fires on fresh ones
+                    except Exception: pass
+                    if os.environ.get("GENITAL_TEX", "1") != "0":
+                        _GT_PY = r'C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/custom_nodes/ComfyUI-HandGraft/genital_texture.py'
+                        _stage("genital texturing")
+                        print("[BlenderSmartUV] GENITAL TEXTURING (headless): bake albedo/roughness/normal onto body UV...")
+                        try:
+                            _gt_r = subprocess.run([BLENDER_EXE, "--background", "--python", _GT_PY, "--",
+                                                    _LAST_SEAMS_BLEND, _GT_OUT],
+                                                   capture_output=True, text=True, timeout=600,
+                                                   encoding='utf-8', errors='replace')
+                            if "RESULT" in (_gt_r.stdout or ""):
+                                for _l in (_gt_r.stdout or "").splitlines():
+                                    if "RESULT" in _l:
+                                        print("  [genital] " + _l)
+                            else:
+                                print("[BlenderSmartUV] WARNING: GENITAL TEXTURING failed -- continuing without it.")
+                                print((_gt_r.stdout or "")[-1200:], (_gt_r.stderr or "")[-600:])
+                        except Exception as _gte:
+                            print(f"[BlenderSmartUV] GENITAL TEXTURING error (non-fatal): {_gte}")
+
+                    _stage("export glb")
+                    print("[BlenderSmartUV] Exporting last_seams.glb...")
+                    r_ex = subprocess.run(
+                        [BLENDER_EXE, _LAST_SEAMS_BLEND, "--background", "--python-exit-code", "1",
+                         "--python",
+                         os.path.join(_UV_TRANSFER_DIR, "export_glb.py")],
+                        capture_output=True, text=True, timeout=120,
+                        encoding='utf-8', errors='replace'
+                    )
+                    for line in (r_ex.stdout or "").splitlines():
+                        print(f"  [export_glb] {line}")
+                    if r_ex.returncode != 0:
+                        raise RuntimeError(f"export_glb.py failed (code {r_ex.returncode})")
+
+                    blender_out = _LAST_SEAMS_GLB
+                else:
+                    # OBJ for template_transfer/smart_uv (preserves UV + smoothing groups)
+                    # GLB for xatlas (trimesh loads it cleanly for atlasing)
+                    blender_out = out_obj if do_blender_uv else out_glb
+                    if not os.path.exists(blender_out):
+                        raise RuntimeError(f"Blender produced no output at {blender_out}")
+                break
+            except Exception as _mpe:
+                print(f"[BlenderSmartUV] mesh-prep attempt {_mp_try + 1}/{len(_MP_SCALES)} "
+                      f"FAILED: {_mpe}")
+                if _mp_try == len(_MP_SCALES) - 1:
+                    print("[BlenderSmartUV] all mesh-prep attempts failed - giving up.")
+                    raise
 
         # ── Re-import ─────────────────────────────────────────────────────────
         s = trimesh_lib.load(blender_out, process=False)
@@ -1787,6 +2147,7 @@ print("[BlenderSmartUV] Export done:", r'{out_obj}')
         else:
             raise RuntimeError("Could not extract mesh from Blender output")
 
+        _stage()   # flush the final stage timing
         print(f"[BlenderSmartUV] Re-imported: {len(loaded.vertices)} verts, {len(loaded.faces)} faces | "
               f"visual={type(loaded.visual).__name__}")
 
@@ -2104,6 +2465,35 @@ class Trellis2FBXExport:
         run_dir   = os.path.join(char_root, f"run_{timestamp}")
         os.makedirs(run_dir, exist_ok=True)
 
+        # Everything that made this mesh goes in the run folder with it, so a run can be judged (or
+        # blamed) months later without hunting through output/3D.  The four views are what Trellis
+        # was actually conditioned on; the Trellis GLB is its raw output before we touch anything.
+        # The views are small and get copied; the GLB is ~120 MB and gets moved, since it was only
+        # sitting in the character root so it could be eyeballed early enough to kill a bad run.
+        try:
+            import glob as _glob, shutil as _sh
+            _front = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  "..", "..", "uv_transfer", "_front_photo.png")
+            _front = os.path.normpath(_front)
+            if os.path.exists(_front):
+                _sh.copy2(_front, os.path.join(run_dir, f"{char_name}__view_front.png"))
+            for _tag in ("BACK", "LEFT", "RIGHT", "TOP"):
+                _c = sorted(_glob.glob(os.path.join(char_root, f"QWEN_{_tag}_*.png")),
+                            key=os.path.getmtime)
+                if _c:
+                    _sh.copy2(_c[-1], os.path.join(run_dir, f"{char_name}__view_{_tag.lower()}.png"))
+            for _g in sorted(_glob.glob(os.path.join(char_root, "TRELLIS_*.glb")),
+                             key=os.path.getmtime):
+                _tag = "raw" if "TRELLIS_RAW" in os.path.basename(_g) else "textured"
+                _dst = os.path.join(run_dir, f"{char_name}__trellis_{_tag}.glb")
+                try:
+                    _sh.move(_g, _dst)
+                except Exception:
+                    _sh.copy2(_g, _dst)
+            print(f"[FBXExport] filed inputs + Trellis GLB into {run_dir}")
+        except Exception as _ce:
+            print(f"[FBXExport] could not file the run inputs ({_ce!r}) - continuing")
+
         # FBX lives inside the run folder alongside its textures so the .fbm
         # folder (created by Blender's FBX exporter) stays self-contained per run.
         fbx_path  = os.path.join(run_dir, f"{char_name}.fbx")
@@ -2282,10 +2672,25 @@ class Trellis2FBXExport:
 
         # ── Serialise eye_info for Blender f-string ───────────────────────────
         # We embed it as a Python dict literal so the Blender script can use it directly.
-        _eye_info_repr  = repr(eye_info)   # None or a valid dict literal
+        def _plain(o):
+            """numpy scalars repr as `np.int64(74)` under NumPy 2, and the generated Blender
+            script has no numpy import -> NameError, the script dies before export_scene.fbx,
+            and (because Blender does not put script errors in its exit code) the wrapper
+            happily printed "Done" with no FBX on disk. Coerce to plain Python first."""
+            if isinstance(o, dict):
+                return {k: _plain(v) for k, v in o.items()}
+            if isinstance(o, (list, tuple)):
+                return type(o)(_plain(v) for v in o)
+            if isinstance(o, np.generic):
+                return o.item()
+            return o
+        _eye_info_repr  = repr(_plain(eye_info))   # None or a plain-Python dict literal
         _eye_tex_l_path = eye_tex_l_path
         _eye_tex_r_path = eye_tex_r_path
         _ortho_scale    = ortho_scale
+        _faceregion_npy = os.path.join(
+            r"C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/uv_transfer",
+            "_gs_faceregion.npy")
 
         sharp_rad = sharp_angle * 3.14159265 / 180.0
         # Pass booleans + paths into the f-string cleanly
@@ -2444,7 +2849,13 @@ print(f"[FBXExport] Material assigned to all {{len(obj.data.polygons)}} faces")
 try:
     import numpy as _nph
     _hf_path = r'C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/uv_transfer/last_seams_hairfaces.npy'
-    if os.path.exists(_hf_path):
+    # HAIR MATERIAL RETIRED (2026-09-04) -- hair colour now comes from the generated back and
+    # side views like every other surface, so the hair needs no material of its own. Retiring
+    # it also removes the coverage-reclaim below, which was the documented cause of a hair
+    # side going missing (it dropped 10784 of 24367 painted hair faces on the last bake and
+    # tripped its own tripwire). Flip _HAIR_MAT_ON to re-enable both.
+    _HAIR_MAT_ON = False
+    if _HAIR_MAT_ON and os.path.exists(_hf_path):
         _hflags = _nph.load(_hf_path)
         _npoly = len(obj.data.polygons)
         if len(_hflags) == _npoly:
@@ -2552,7 +2963,18 @@ try:
     _gf_path = r'C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/uv_transfer/_gs_genital_mat.npy'
     _gtex = r'C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/uv_transfer/genital_tex'
     _galb = os.path.join(_gtex, 'genital_albedo.png')
-    if os.path.exists(_gf_path) and os.path.exists(_galb):
+    # OFF by default (2026-09-09). This overlay is currently WORSE than the body atlas it covers:
+    # genital_albedo.png is baked at 2048 against a 4096 body atlas (so its edges read as blocky
+    # steps), large parts of it are unpainted BLACK -- which is the black patch that shows above the
+    # crotch -- and its painted zones do not line up with where the anatomy actually sits on the
+    # genital island. The body atlas underneath is resampled from Trellis's own texture, is aligned
+    # by construction and is full resolution, so covering it with this loses on every count.
+    # Re-enable with env GENITAL_MATERIAL=1 once genital_texture.py bakes at the atlas resolution
+    # and its zones register with the island.
+    if os.environ.get("GENITAL_MATERIAL", "0") != "1":
+        print("[FBXExport] Genital material DISABLED (GENITAL_MATERIAL=0) -- the body atlas covers "
+              "that region; the 2048 overlay was blocky, partly black and misregistered.")
+    elif os.path.exists(_gf_path) and os.path.exists(_galb):
         _gflags = _npg.load(_gf_path).astype(bool)
         _gnp = len(obj.data.polygons)
         if len(_gflags) == _gnp:
@@ -2591,24 +3013,62 @@ _eye_tex_l_path = r'{_eye_tex_l_path}'
 _eye_tex_r_path = r'{_eye_tex_r_path}'
 _ortho_scale    = {_ortho_scale}
 
+_FACE_MASK = None
+try:
+    import numpy as _np_fm
+    _fm_p = r"{_faceregion_npy}"
+    if _fm_p and os.path.exists(_fm_p):
+        _FACE_MASK = _np_fm.load(_fm_p)
+        print("[EyeAdd] face-region mask loaded:", int(_FACE_MASK.sum()), "faces")
+except Exception as _fm_e:
+    print("[EyeAdd] face-region mask unavailable:", _fm_e)
+
+
 def _uv_to_3d(uv_x, uv_y, mesh_obj, ortho_scale):
-    # Convert normalised image-UV (0-1, Y-down) to 3D world-space by casting
-    # an orthographic ray from the front (+Y) and finding the mesh intersection.
-    # Returns (world_location, world_normal) or (None, None) on miss.
-    world_x = (uv_x - 0.5) * ortho_scale        # image X -> world X
-    world_z = (0.5 - uv_y)  * ortho_scale        # image Y (down) → world Z (up)
-    ray_origin = mathutils.Vector((world_x, 10.0, world_z))
-    ray_dir    = mathutils.Vector((0.0, -1.0, 0.0))
+    # Image-UV -> a point on the mesh. Self-calibrating and frame-agnostic.
+    # Two bugs made this miss 100% of the time (measured 0/2) once eye detection
+    # finally started producing input:
+    #  * SCALE: (0.5-uv_y)*ortho_scale = 0.5025 against a head topping out at 0.501,
+    #    so the ray passed over the skull. ortho_scale is the projector clip scale,
+    #    not this mesh extent. Use the mesh own bounding box: the character fills the
+    #    frame (char_h 894 of 896px), so image fraction maps straight onto it.
+    #  * SIDE: it cast from world +Y, which on this mesh is local -Z, the BACK of the
+    #    head. Cast from both sides and keep the hit that lands on the face region.
+    _bb = [mesh_obj.matrix_world @ mathutils.Vector(c) for c in mesh_obj.bound_box]
+    _xs = [q.x for q in _bb]; _ys = [q.y for q in _bb]; _zs = [q.z for q in _bb]
+    lo = [min(_xs), min(_ys), min(_zs)]
+    hi = [max(_xs), max(_ys), max(_zs)]
+    ext = [hi[i] - lo[i] for i in range(3)]
+    UP  = max(range(3), key=lambda i: ext[i])
+    DEP = min(range(3), key=lambda i: ext[i])
+    LAT = 3 - UP - DEP
+    base = [0.0, 0.0, 0.0]
+    base[LAT] = lo[LAT] + uv_x * ext[LAT]
+    base[UP]  = hi[UP]  - uv_y * ext[UP]
     mat_inv = mesh_obj.matrix_world.inverted()
-    lo = mat_inv @ ray_origin
-    ld = mat_inv.to_3x3() @ ray_dir
-    ld.normalize()
-    hit, loc, nrm, _ = mesh_obj.ray_cast(lo, ld)
-    if hit:
-        w_loc = mesh_obj.matrix_world @ loc
-        w_nrm = (mesh_obj.matrix_world.to_3x3() @ nrm).normalized()
-        return w_loc, w_nrm
-    return None, None
+    best = None
+    for _sgn in (1, -1):
+        o = list(base)
+        o[DEP] = (hi[DEP] + 1.0) if _sgn > 0 else (lo[DEP] - 1.0)
+        d = [0.0, 0.0, 0.0]
+        d[DEP] = -1.0 if _sgn > 0 else 1.0
+        _ro = mat_inv @ mathutils.Vector(o)
+        _rd = (mat_inv.to_3x3() @ mathutils.Vector(d)); _rd.normalize()
+        hit, loc, nrm, fidx = mesh_obj.ray_cast(_ro, _rd)
+        if not hit:
+            continue
+        on_face = False
+        if _FACE_MASK is not None and 0 <= fidx < len(_FACE_MASK):
+            on_face = bool(_FACE_MASK[fidx])
+        cand = (mesh_obj.matrix_world @ loc,
+                (mesh_obj.matrix_world.to_3x3() @ nrm).normalized(), on_face)
+        if best is None or (on_face and not best[2]):
+            best = cand
+    if best is None:
+        return None, None
+    if _FACE_MASK is not None and not best[2]:
+        print("[EyeAdd] WARNING: ray hit the mesh but not the face region")
+    return best[0], best[1]
 
 def _add_eyeball(name, center, radius, iris_color_rgb, tex_path):
     # Add a UV-sphere eyeball using bmesh directly — works in --background mode
@@ -2708,16 +3168,24 @@ print("[FBXExport] *** FBX saved:", r'{fbx_path}', "***")
 
         print(f"[FBXExport] Running Blender → {fbx_path}")
         result = subprocess.run(
-            [BLENDER_EXE, "--background", "--python", script_path],
+            # --python-exit-code: without it Blender exits 0 even when the script raises, so a
+            # crash in the eye/material code looked like a successful export with no file.
+            [BLENDER_EXE, "--background", "--python-exit-code", "1", "--python", script_path],
             capture_output=True, text=True, timeout=300,
             encoding='utf-8', errors='replace'
         )
         for line in (result.stdout or "").splitlines():
-            if "[FBXExport]" in line or "ERROR" in line.upper() or "WARNING" in line.upper():
+            if ("[FBXExport]" in line or "[EyeAdd]" in line
+                    or "ERROR" in line.upper() or "WARNING" in line.upper()):
                 print(line)
         if result.returncode != 0:
-            print("[FBXExport] STDERR:", result.stderr[-2000:])
+            print("[FBXExport] STDERR:", (result.stderr or "")[-3000:])
             raise RuntimeError(f"Blender FBX export failed with code {result.returncode}")
+        if not os.path.exists(fbx_path):
+            # The export is the whole point of this node; saying "Done" without the file on disk
+            # is how a silent Blender-side crash reached the user as "there is no material".
+            print("[FBXExport] STDERR:", (result.stderr or "")[-3000:])
+            raise RuntimeError(f"[FBXExport] Blender reported success but {fbx_path} does not exist")
 
         print(f"[FBXExport] Done → {fbx_path}")
         print(f"[FBXExport]   albedo:            {albedo_png if has_albedo else 'not saved'}")
@@ -2831,12 +3299,325 @@ class Trellis2RenderClayView:
         return (_t.from_numpy(_np.stack(frames, 0)),)
 
 
+class Trellis2MeshGuard:
+    """Pass `candidate` through, but fall back to `fallback` if the candidate is corrupt.
+
+    Why: on 2026-09-09 a fresh geometry chain produced a mesh whose X axis was destroyed -- 67% of
+    vertices sitting between -1e7 and -1.23e11 while Y and Z stayed perfectly normal, so the body's
+    bounding box read [2.99e10, 0.997, 0.514]. The generator was NOT at fault: its own export from
+    that same run measured extent [0.8704, 0.9999, 0.1977], ratio 0.198, zero out-of-range verts.
+    Something in remesh -> CuMesh fill -> meshlib fill wrecked it, and the first thing to trip over
+    it was find_wrist (wrists at -8.7e10), 11 minutes in.
+
+    Hole filling is a nice-to-have. A mesh with a few unfilled holes is enormously better than a
+    destroyed one, so when a stage corrupts the mesh this hands the previous stage's mesh onward and
+    says loudly which stage did it -- instead of failing the bake. That also identifies the culprit
+    on the first occurrence rather than costing a bisect.
+
+    The test is RELATIVE: a stage that fills holes must not change the silhouette, so the candidate
+    is judged against the fallback's own bounding box, not against any absolute size."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "candidate": ("MESHWITHVOXEL", {"tooltip": "Output of the stage being guarded."}),
+                "fallback":  ("MESHWITHVOXEL", {"tooltip": "That stage's INPUT -- used if it corrupted the mesh."}),
+            },
+            "optional": {
+                "stage_name": ("STRING", {"default": "", "tooltip": "Named in the warning."}),
+            },
+        }
+
+    RETURN_TYPES = ("MESHWITHVOXEL",)
+    RETURN_NAMES = ("mesh",)
+    FUNCTION = "execute"
+    CATEGORY = "Trellis2Wrapper"
+
+    @staticmethod
+    def _extent(m):
+        try:
+            v = m.vertices
+            v = v.detach().cpu().numpy() if hasattr(v, "detach") else np.asarray(v)
+            v = np.asarray(v, np.float64)
+            if v.size == 0:
+                return None, None, "empty"
+            finite = np.isfinite(v).all(1)
+            if not finite.any():
+                return None, None, "all vertices non-finite"
+            ext = v[finite].max(0) - v[finite].min(0)
+            return ext, int((~finite).sum()), None
+        except Exception as e:
+            return None, None, f"unreadable ({e!r})"
+
+    @staticmethod
+    def _shells(m):
+        """Connected-component count and the largest component's share.
+
+        Trellis models hair as SEPARATE shells floating over the body -- measured on the raw
+        generator output, hair faces at the shoulder share ZERO vertices with the skin under them.
+        Something in remesh -> hole fill welds them in: by the time the mesh reaches SmartUV, one
+        component already holds 92% of the vertices and spans the whole body, and the shoulder goes
+        from 0.8% hair-coloured to 17.9%. That weld is what makes the hair read as short, holed, and
+        smeared yellow across the shoulders -- a 1mm shell cannot survive being unioned with a torso.
+        Printing the shell count either side of every stage names the stage that does it, at the
+        cost of one bake instead of a bisect."""
+        try:
+            from scipy.sparse import coo_matrix
+            from scipy.sparse.csgraph import connected_components
+            v = m.vertices; f = m.faces
+            v = v.detach().cpu().numpy() if hasattr(v, "detach") else np.asarray(v)
+            f = f.detach().cpu().numpy() if hasattr(f, "detach") else np.asarray(f)
+            f = np.asarray(f, np.int64)
+            n = len(v)
+            if n == 0 or len(f) == 0:
+                return None, None
+            e = np.concatenate([f[:, [0, 1]], f[:, [1, 2]], f[:, [2, 0]]], 0)
+            g = coo_matrix((np.ones(len(e), np.int8), (e[:, 0], e[:, 1])), shape=(n, n))
+            ncomp, lab = connected_components(g, directed=False)
+            big = int(np.bincount(lab).max())
+            return int(ncomp), 100.0 * big / max(n, 1)
+        except Exception:
+            return None, None
+
+    def execute(self, candidate, fallback, stage_name=""):
+        tag = stage_name or "stage"
+        ce, cnf, cerr = self._extent(candidate)
+        fe, fnf, ferr = self._extent(fallback)
+        why = None
+        if cerr:
+            why = cerr
+        elif cnf:
+            why = f"{cnf:,} non-finite vertices"
+        elif ce is not None:
+            if float(ce.min()) <= 0 or float(ce.min() / ce.max()) < 0.02:
+                why = (f"degenerate bounding box {np.round(ce, 4).tolist()} "
+                       f"(thinnest axis {100 * ce.min() / ce.max():.2f}% of the longest; a body is ~19%)")
+            elif fe is not None and float(ce.max()) > 3.0 * float(fe.max()):
+                # a hole fill must not change the silhouette
+                why = (f"bounding box grew from {np.round(fe, 4).tolist()} to "
+                       f"{np.round(ce, 4).tolist()} -- {float(ce.max() / max(fe.max(), 1e-12)):.3g}x")
+        if why is None:
+            _cs, _cb = self._shells(candidate)
+            _fs, _fb = self._shells(fallback)
+            _sh = ""
+            if _cs is not None and _fs is not None:
+                # Reported as a plain sanity metric. NOT evidence about hair: Trellis already ships
+                # the hair fused to the body (welding its verts by POSITION, hair and skin at the
+                # shoulder share 261 vertices and sit in the same component; the raw mesh is 7
+                # shells with the largest holding 93.8%). Our chain leaves that essentially
+                # unchanged at 92.0%. An earlier reading of "separate shells" was an artifact of the
+                # GLB duplicating vertices at UV seams -- index sharing is not connectivity there.
+                _sh = f"  shells {_fs:,}->{_cs:,}  largest {_fb:.1f}%->{_cb:.1f}%"
+                if _cb - _fb > 5.0:
+                    _sh += "   <== this stage merged geometry that was separate on the way in"
+            print(f"[MeshGuard] {tag}: OK  extent={np.round(ce, 4).tolist() if ce is not None else '?'}{_sh}",
+                  flush=True)
+            return (candidate,)
+        # ABORT-ONLY by default. Substituting the previous stage's mesh is a real geometry change --
+        # it silently ships a mesh with whatever holes this stage would have filled -- so it must not
+        # be on while the pipeline is being judged against a known-good reference. Detecting the
+        # corruption is the valuable half and costs nothing: this failure otherwise burns 20+ minutes
+        # grinding CUDA and numpy over infinite coordinates before anything notices.
+        # Set MESHGUARD_FALLBACK=1 to allow the substitution and let the bake continue.
+        if os.environ.get("MESHGUARD_FALLBACK", "0") != "1":
+            raise RuntimeError(
+                f"[MeshGuard] {tag} CORRUPTED THE MESH: {why}. Stopping here rather than spending "
+                f"the rest of the bake on it. {tag} is the stage to fix. "
+                f"Set MESHGUARD_FALLBACK=1 to continue from this stage's INPUT instead "
+                f"(you keep whatever holes {tag} would have filled).")
+
+        # The fallback is only a fallback if it is itself sound. If the mesh was ALREADY broken on
+        # the way in, this stage merely inherited it -- say so and stop, rather than passing a
+        # corrupt mesh downstream under the banner of having recovered.
+        _fbad = ferr
+        if not _fbad and fnf:
+            _fbad = f"{fnf:,} non-finite vertices"
+        if not _fbad and fe is not None and (float(fe.min()) <= 0 or float(fe.min() / fe.max()) < 0.02):
+            _fbad = (f"degenerate bounding box {np.round(fe, 4).tolist()} "
+                     f"(thinnest axis {100 * fe.min() / fe.max():.2f}% of the longest)")
+        if _fbad or fe is None:
+            raise RuntimeError(
+                f"[MeshGuard] {tag}: the mesh is corrupt ({why}) AND was already corrupt on the way "
+                f"in ({_fbad}). So {tag} is not the culprit -- the damage happened UPSTREAM of it. "
+                f"Stopped here rather than carrying a broken mesh through the rest of the bake.")
+        print(f"*** [MeshGuard] {tag} CORRUPTED THE MESH: {why}.\n"
+              f"*** Falling back to that stage's INPUT (extent {np.round(fe, 4).tolist()}) and "
+              f"continuing. This bake keeps whatever holes {tag} would have filled.\n"
+              f"*** {tag} is the stage to fix.", flush=True)
+        return (fallback,)
+
+
+class Trellis2ShapeGate:
+    """Judge the generated shape IMMEDIATELY and abort a bad draw before the expensive stages.
+
+    Trellis draws a fresh shape each run and some draws are simply bad -- most visibly a spurious
+    extra limb between the legs. Measured on one such draw, that limb is not subtle: it is its own
+    connected component holding 5.6% of the vertices, running the full length of the legs
+    (y -0.500..-0.200) and only 0.08 wide. The eyes, which are legitimately separate, hold 0.1%
+    each -- so "a detached component holding more than 1% of the mesh" separates them cleanly with
+    no tuning.
+
+    Placed right after the generator, this costs seconds and saves the ~25 minutes of remesh, hole
+    fill, graft, UV unwrap, texture transfer and rigging that a doomed mesh would otherwise consume.
+    That is the same fail-fast rule as the mesh-sanity and UV tripwires, moved to the earliest point
+    where the defect is visible.
+
+    NOTE it aborts rather than re-rolls: ComfyUI has no loop primitive, so re-queueing is the retry.
+    Set the generator's seed control to 'randomize' and a re-queue draws a new shape.
+    Toggle: env SHAPE_GATE=0 to pass everything through."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {"mesh": ("MESHWITHVOXEL",)},
+            "optional": {
+                "max_stray_fraction": ("FLOAT", {"default": 0.01, "min": 0.001, "max": 1.0, "step": 0.001,
+                                       "tooltip": "A detached component larger than this share of the "
+                                                  "mesh is a spurious limb. Eyes are ~0.1%."}),
+            },
+        }
+
+    RETURN_TYPES = ("MESHWITHVOXEL",)
+    RETURN_NAMES = ("mesh",)
+    FUNCTION = "execute"
+    CATEGORY = "Trellis2Wrapper"
+
+    def execute(self, mesh, max_stray_fraction=0.01):
+        if os.environ.get("SHAPE_GATE", "1") == "0":
+            print("[ShapeGate] disabled (SHAPE_GATE=0)", flush=True)
+            return (mesh,)
+        try:
+            from scipy.sparse import coo_matrix
+            from scipy.sparse.csgraph import connected_components
+            v = mesh.vertices; f = mesh.faces
+            v = v.detach().cpu().numpy() if hasattr(v, "detach") else np.asarray(v)
+            f = f.detach().cpu().numpy() if hasattr(f, "detach") else np.asarray(f)
+            v = np.asarray(v, np.float64); f = np.asarray(f, np.int64)
+        except Exception as e:
+            print(f"[ShapeGate] could not read the mesh ({e!r}) -- passing through", flush=True)
+            return (mesh,)
+
+        fails = []
+        finite = np.isfinite(v).all(1)
+        if not finite.all():
+            fails.append(f"{int((~finite).sum()):,} non-finite vertices")
+        if finite.any():
+            ext = v[finite].max(0) - v[finite].min(0)
+            if ext.max() <= 0 or ext.min() / ext.max() < 0.02:
+                fails.append(f"degenerate bounding box {np.round(ext, 4).tolist()}")
+
+        # Weld by POSITION before counting components. The generator splits vertices at UV seams,
+        # so index-based connectivity reports hundreds of thousands of phantom "shells" and would
+        # make this test meaningless -- a trap that already cost one wrong diagnosis on this project.
+        stray = []
+        try:
+            scale = float(np.ptp(v[finite], 0).max()) if finite.any() else 1.0
+            q = np.round(v / max(scale * 1e-5, 1e-12)).astype(np.int64)
+            _, inv = np.unique(q, axis=0, return_inverse=True)
+            fw = inv[f]
+            n = int(inv.max()) + 1
+            e = np.concatenate([fw[:, [0, 1]], fw[:, [1, 2]], fw[:, [2, 0]]], 0)
+            g = coo_matrix((np.ones(len(e), np.int8), (e[:, 0], e[:, 1])), shape=(n, n))
+            ncomp, lab = connected_components(g, directed=False)
+            sizes = np.bincount(lab)
+            main = int(sizes.argmax())
+            frac = sizes / max(n, 1)
+            for ci in np.argsort(sizes)[::-1]:
+                if ci == main or frac[ci] <= max_stray_fraction:
+                    continue
+                p = v[np.isin(lab, [ci])[inv]] if False else v[(lab[inv] == ci)]
+                ex = (p.max(0) - p.min(0)) / max(scale, 1e-12)
+                stray.append((int(sizes[ci]), float(frac[ci]), np.round(ex, 3).tolist()))
+            print(f"[ShapeGate] {n:,} welded verts, {ncomp:,} component(s), largest {100*frac[main]:.1f}%",
+                  flush=True)
+            for cnt, fr, ex in stray:
+                print(f"[ShapeGate]   STRAY component: {cnt:,} verts ({100*fr:.1f}%) extent {ex}", flush=True)
+            if stray:
+                fails.append(f"{len(stray)} detached component(s) over {100*max_stray_fraction:.1f}% "
+                             f"of the mesh (largest {100*stray[0][1]:.1f}%) -- a spurious limb")
+        except Exception as e:
+            print(f"[ShapeGate] component check skipped ({e!r})", flush=True)
+
+        if fails:
+            raise RuntimeError(
+                "[ShapeGate] REJECTING THIS SHAPE: " + "; ".join(fails) +
+                ". Stopped at the generator instead of spending ~25 more minutes remeshing, "
+                "grafting, unwrapping and texturing a mesh that would have to be redone. "
+                "Re-queue to draw a new shape (set the generator seed control to 'randomize'), "
+                "or set SHAPE_GATE=0 to force this one through.")
+        print("[ShapeGate] shape accepted", flush=True)
+        return (mesh,)
+
+
+class Trellis2TrellisTexture:
+    """Base colour + metallic-roughness resampled from TRELLIS'S OWN texture onto the final UVs.
+
+    Drop-in replacement for Trellis2MultiViewTexturing's base_color / metallic_roughness outputs.
+    Trellis paints its mesh at generation time, so its texture is aligned to that mesh by
+    construction -- there are no cameras and therefore no surfaces that no camera can see. The
+    projection path left 9.7-12.8% of the body's surface area unpainted on real bakes (feet ~37%);
+    this leaves 0.00%. The algorithm and the reasoning live in uv_transfer/trellis_transfer.py."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "obj_path": ("STRING", {"forceInput": True,
+                             "tooltip": "obj_path from Trellis2BlenderSmartUV (the final UVs)."}),
+                "source_trimesh": ("TRIMESH", {
+                             "tooltip": "Trellis's own textured mesh -- the trimesh output of "
+                                        "Trellis2UnWrapAndRasterizer fed from the mesh generator."}),
+            },
+            "optional": {
+                "texture_size": ("INT", {"default": 4096, "min": 512, "max": 8192, "step": 512}),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_NAMES = ("base_color", "metallic_roughness")
+    FUNCTION = "execute"
+    CATEGORY = "Trellis2Wrapper"
+
+    # the algorithm lives in a separate file so it can be edited without a ComfyUI restart
+    @classmethod
+    def IS_CHANGED(cls, **kwargs):
+        import os as _o
+        _p = r"C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/uv_transfer/trellis_transfer.py"
+        try:
+            return str(_o.path.getmtime(_p))
+        except Exception:
+            return float("nan")
+
+    def execute(self, obj_path, source_trimesh, texture_size=4096):
+        import importlib
+        import sys as _sys
+        import torch as _t
+        _uv = r"C:/applications/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/uv_transfer"
+        if _uv not in _sys.path:
+            _sys.path.insert(0, _uv)
+        import trellis_transfer as _tt
+        importlib.reload(_tt)            # pick up edits without restarting ComfyUI
+        if not obj_path or not os.path.exists(obj_path):
+            raise RuntimeError(f"[TrellisTexture] obj_path missing: {obj_path!r}. "
+                               "Connect it to Trellis2BlenderSmartUV's obj_path output.")
+        base, mr = _tt.transfer(obj_path, source_trimesh, size=int(texture_size), log=print)
+        base_t = _t.from_numpy(base.astype(np.float32))[None, ...]
+        mr_t = _t.from_numpy((mr if mr is not None else np.zeros_like(base)).astype(np.float32))[None, ...]
+        print(f"[TrellisTexture] base_color {tuple(base_t.shape)}"
+              f"{'' if mr is not None else '  (source had no MR texture -- emitting black)'}", flush=True)
+        return (base_t, mr_t)
+
+
 NODE_CLASS_MAPPINGS = {
     "FlattenLight":           FlattenLight,
     "Trellis2BlenderSmartUV": Trellis2BlenderSmartUV,
     "Trellis2XAtlasUnwrap":   Trellis2XAtlasUnwrap,
     "Trellis2FBXExport":      Trellis2FBXExport,
     "Trellis2RenderClayView": Trellis2RenderClayView,
+    "Trellis2TrellisTexture": Trellis2TrellisTexture,
+    "Trellis2MeshGuard":      Trellis2MeshGuard,
+    "Trellis2ShapeGate":      Trellis2ShapeGate,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -2845,6 +3626,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Trellis2XAtlasUnwrap":   "Trellis2 - XAtlas UV Unwrap",
     "Trellis2FBXExport":      "Trellis2 - FBX Export (hard edges)",
     "Trellis2RenderClayView": "Trellis2 - Render Clay View (untextured, for Canny)",
+    "Trellis2TrellisTexture": "Trellis2 - Trellis Own Texture -> final UVs",
+    "Trellis2MeshGuard":      "Trellis2 - Mesh Guard (fall back if a stage corrupts it)",
+    "Trellis2ShapeGate":      "Trellis2 - Shape Gate (reject a bad draw early)",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]

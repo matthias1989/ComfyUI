@@ -1245,6 +1245,19 @@ try:
 except Exception as _e:
     print(f"[KAN8-hairUV] FAILED ({_e!r}) — hair-shell seam skipped")
 
+# ── HAIR SEAMS RETIRED (2026-09-04) ───────────────────────────────────────────
+# Every hair seam below existed to fence the hair off so a FRONT-ONLY photo could be
+# interpolated into the sides and back without bleeding. We now generate real back/left/
+# right views, so there is nothing to fence.
+# They were also actively destroying the face: the face-chart strips its internal cuts to
+# leave the face seam-free, and THEN the hairline loop / back-fold / hair-island guard ran
+# and cut it back up -- measured on bake 031101, the 5050-face chart ended as 31 disjoint
+# UV components holding 1.30%% of the atlas, which is why the face never landed.
+# The face-chart comment below assumes the face "is NOT enclosed by the hairline"; with
+# these retired, that assumption is true again.
+# is_hair itself is still computed (the texture projector reads _genseams_viz.npz).
+_HAIR_SEAMS = False
+
 # ── Keep body-cuts OUT of the hair ────────────────────────────────────────────
 # The anatomical cuts (chin ring, back-center head/neck lines, etc.) were built to
 # unwrap a humanoid BODY and run straight through the head — and thus through the
@@ -1252,10 +1265,7 @@ except Exception as _e:
 # small margin), so those cuts stop SHORT of the hairline.  The hairline boundary
 # itself is one-hair-one-skin per edge so it survives — the hair ends up a single
 # island bounded by the hairline.
-try:
-    _hd = is_hair; _hair_ok = True
-except NameError:
-    _hair_ok = False
+_hair_ok = False   # RETIRED hair-island margin/strip -- see _HAIR_SEAMS note
 if _hair_ok:
     # Keep ARM/SHOULDER/WRIST rings complete (they isolate the limbs), but DO strip the
     # EAR ring-cut where it is BURIED inside hair (both adjacent faces hair): a hair-
@@ -1370,8 +1380,17 @@ try:
         # MediaPipe is ALREADY a clean face oval (forehead->chin, no ear). Only fill interior
         # holes (eyes/nostrils). Do NOT dilate/_close it — that grew it past the hairline into
         # the hair+ear and split the lower face (the bad seam through the lips).
-        _facechart = _solid(_mp)
-        print(f"[face-chart] MediaPipe face region (clean, no dilate): {int(_facechart.sum())} faces")
+        # Drop disconnected SPECKS before the boundary is drawn. The mask is oval-shaped
+        # overall but speckled at the edge, and every speck contributes its own boundary
+        # loop + its own UV island: measured 4041 boundary edges for a 4909-face region,
+        # shattering the atlas into 601 islands. _cc_keep only REMOVES small components --
+        # it never grows the region, so it cannot push past the hairline into hair/ear.
+        _fc_raw = _solid(_mp)
+        _facechart = _cc_keep(_fc_raw, 300)
+        if int(_facechart.sum()) < 500:          # speck-cull ate the face -> keep raw
+            _facechart = _fc_raw
+        print(f"[face-chart] MediaPipe face region (clean, no dilate): {int(_facechart.sum())} faces "
+              f"(speck-cull {int(_fc_raw.sum())} -> {int(_facechart.sum())})")
     else:
         # geometric region is speckled -> close + solid-fill into one contiguous patch, drop specks.
         _facechart = _cc_keep(_solid(_close(_geo_face, 3)), 300)
@@ -1430,6 +1449,36 @@ try:
 except Exception as _gne:
     print(f"[genital-chart] skipped: {_gne!r}")
 
+# HAIR CHART. Measured on the 2026-09-05 bake: the hair spanned SEVEN UV islands, split 58%/38%
+# between two big islands in which it was only 38% and 28% of the faces -- i.e. the hair was cut in
+# half by a body seam and each half was packed alongside body skin. That is why the hair comes out
+# in more than one colour with a hard vertical boundary down the back: the two halves are filled and
+# bled against skin, not against each other. The face and the genital already get exactly this
+# treatment; the hair never did, despite "hair = one UV island" being the documented intent.
+# Same two rules as the genital chart: strip cuts INTERIOR to the hair, add its full boundary.
+try:
+    _hc = None
+    if 'is_hair' in dir() or 'is_hair' in globals():
+        _h = np.asarray(is_hair, dtype=bool)
+        if _h.shape[0] == n_faces and int(_h.sum()) > 50:
+            _hc = _h
+    if _hc is not None:
+        _hc_strip = 0; _hc_add = 0
+        for _eidx, _fcs in edge_faces.items():
+            if len(_fcs) == 2:
+                _ia, _ib = bool(_hc[_fcs[0]]), bool(_hc[_fcs[1]])
+                _k = _edge_key(_eidx)
+                if _ia and _ib:                       # interior to the hair -> no internal cuts
+                    if _k in all_seam: all_seam.discard(_k); _hc_strip += 1
+                elif _ia != _ib:                      # boundary -> hair becomes its own island
+                    all_seam.add(_k); _hc_add += 1
+        print(f"[hair-chart] region={int(_hc.sum())} faces; stripped {_hc_strip} internal cuts, "
+              f"+{_hc_add} boundary -> hair is its own UV island")
+    else:
+        print("[hair-chart] no usable is_hair mask (skipped)")
+except Exception as _hce:
+    print(f"[hair-chart] skipped: {_hce!r}")
+
 # ── Mark seams ────────────────────────────────────────────────────────────────
 for edge in me.edges: edge.use_seam = False
 eidx = {}
@@ -1441,80 +1490,312 @@ for k in all_seam:
     if k in eidx: me.edges[eidx[k]].use_seam = True; marked += 1
 print(f"Marked {marked} seam edges")
 
-# ── HAIRLINE SEAM (KAN-9): the path3 LOOP, post-fixed around the face, marked here ON TOP of the body
-#    seams (replaces the old is_hair boundary). All logic in _hairline_pipe so a bake runs EXACTLY this.
-try:
-    import importlib.util as _hpilu
-    _hpp = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_hairline_pipe.py')
-    _hps = _hpilu.spec_from_file_location('_hairline_pipe', _hpp)
-    _hpm = _hpilu.module_from_spec(_hps); _hps.loader.exec_module(_hpm)
-    _hpm.mark_loop_seam(me, eidx, os.path.dirname(os.path.abspath(__file__)))
-except Exception as _hpe:
-    import traceback as _tb; _tb.print_exc()
-    print(f"[hairline-pipe] FAILED ({_hpe!r}) -- no hairline seam this run")
+if _HAIR_SEAMS:   # RETIRED hairline path3 loop -- see _HAIR_SEAMS note
+    # ── HAIRLINE SEAM (KAN-9): the path3 LOOP, post-fixed around the face, marked here ON TOP of the body
+    #    seams (replaces the old is_hair boundary). All logic in _hairline_pipe so a bake runs EXACTLY this.
+    try:
+        import importlib.util as _hpilu
+        _hpp = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_hairline_pipe.py')
+        _hps = _hpilu.spec_from_file_location('_hairline_pipe', _hpp)
+        _hpm = _hpilu.module_from_spec(_hps); _hps.loader.exec_module(_hpm)
+        _hpm.mark_loop_seam(me, eidx, os.path.dirname(os.path.abspath(__file__)))
+    except Exception as _hpe:
+        import traceback as _tb; _tb.print_exc()
+        print(f"[hairline-pipe] FAILED ({_hpe!r}) -- no hairline seam this run")
 
-# ── BACK-FOLD seam: marked AFTER mark_loop_seam so its de-double/prune NEVER touches these edges (that is
-#    why the loop-merged version erased the real seams). The fold edges are gb-mesh (== export) indices ->
-#    eidx maps them straight. Add-only: it can only set use_seam=True, never clear it. ──
-try:
-    _foldp = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_gb_fold.npz')
-    if os.path.exists(_foldp):
-        _fe = np.load(_foldp)['edges']; _nfm = 0; _nbr = 0
-        _bvadj = defaultdict(set)                                      # export-mesh vertex adjacency, to bridge
-        for _e in me.edges:                                           # quad diagonals (gb-mesh tri edge that is a
-            _bvadj[int(_e.vertices[0])].add(int(_e.vertices[1]))      # quad's diagonal has no export edge -> gap)
-            _bvadj[int(_e.vertices[1])].add(int(_e.vertices[0]))
-        for _u, _w in _fe:
-            _u, _w = int(_u), int(_w); _k = (min(_u, _w), max(_u, _w))
-            if _k in eidx:
-                me.edges[eidx[_k]].use_seam = True; _nfm += 1
-            else:
-                _common = _bvadj[_u] & _bvadj[_w]                     # detour through the quad's shared vertex
-                if _common:
-                    _mid = min(_common, key=lambda m: (me.vertices[_u].co - me.vertices[m].co).length + (me.vertices[m].co - me.vertices[_w].co).length)
-                    for _a, _b in ((_u, _mid), (_mid, _w)):
-                        _ee = eidx.get((min(_a, _b), max(_a, _b)))
-                        if _ee is not None:
-                            me.edges[_ee].use_seam = True
-                    _nbr += 1
-        print(f"[back-fold] marked {_nfm} + bridged {_nbr} of {len(_fe)} back-seam edges (separate, after the loop)")
-except Exception as _bfe:
-    import traceback as _bft; _bft.print_exc(); print(f"[back-fold] skipped ({_bfe!r})")
+if _HAIR_SEAMS:   # RETIRED back-fold seam -- see _HAIR_SEAMS note
+    # ── BACK-FOLD seam: marked AFTER mark_loop_seam so its de-double/prune NEVER touches these edges (that is
+    #    why the loop-merged version erased the real seams). The fold edges are gb-mesh (== export) indices ->
+    #    eidx maps them straight. Add-only: it can only set use_seam=True, never clear it. ──
+    try:
+        _foldp = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_gb_fold.npz')
+        if os.path.exists(_foldp):
+            _fe = np.load(_foldp)['edges']; _nfm = 0; _nbr = 0
+            _bvadj = defaultdict(set)                                      # export-mesh vertex adjacency, to bridge
+            for _e in me.edges:                                           # quad diagonals (gb-mesh tri edge that is a
+                _bvadj[int(_e.vertices[0])].add(int(_e.vertices[1]))      # quad's diagonal has no export edge -> gap)
+                _bvadj[int(_e.vertices[1])].add(int(_e.vertices[0]))
+            for _u, _w in _fe:
+                _u, _w = int(_u), int(_w); _k = (min(_u, _w), max(_u, _w))
+                if _k in eidx:
+                    me.edges[eidx[_k]].use_seam = True; _nfm += 1
+                else:
+                    _common = _bvadj[_u] & _bvadj[_w]                     # detour through the quad's shared vertex
+                    if _common:
+                        _mid = min(_common, key=lambda m: (me.vertices[_u].co - me.vertices[m].co).length + (me.vertices[m].co - me.vertices[_w].co).length)
+                        for _a, _b in ((_u, _mid), (_mid, _w)):
+                            _ee = eidx.get((min(_a, _b), max(_a, _b)))
+                            if _ee is not None:
+                                me.edges[_ee].use_seam = True
+                        _nbr += 1
+            print(f"[back-fold] marked {_nfm} + bridged {_nbr} of {len(_fe)} back-seam edges (separate, after the loop)")
+    except Exception as _bfe:
+        import traceback as _bft; _bft.print_exc(); print(f"[back-fold] skipped ({_bfe!r})")
 
-# ── KAN-8 FINAL MESH GUARD: enforce the hair-island invariant on the FINAL use_seam, AFTER
-#    the loop + back-fold (both mark edges directly, bypassing all_seam, so they can leave
-#    hair⇄hair cuts the all_seam pass never sees — the back-fold IS a back-of-hair relief
-#    cut). The user's rule, guaranteed on what actually ships: (1) EVERY hair⇄skin edge is a
-#    seam → each natural hair shell is fully bounded / split off from the body / no leak;
-#    (2) NO hair⇄hair edge is a seam → no internal cut splits a shell (back hair stays one
-#    clean fillable piece). Nothing is dropped (no side goes missing); body⇄body and the
-#    skin-side face-chart seams are untouched. This is exactly the state verified on
-#    last_seams (8 clean leak-free shells, biggest spans both sides).
-try:
-    _gb_add = 0; _gb_strip = 0
-    for _ei2, _fcs2 in edge_faces.items():
-        if len(_fcs2) != 2:
-            continue
-        _fa2, _fb2 = _fcs2[0], _fcs2[1]
-        _e2 = eidx.get(_edge_key(_ei2))
-        if _e2 is None:
-            continue
-        if is_hair[_fa2] != is_hair[_fb2]:                 # hair⇄skin boundary → must be a seam
-            if not me.edges[_e2].use_seam:
-                me.edges[_e2].use_seam = True; _gb_add += 1
-        elif is_hair[_fa2] and is_hair[_fb2]:              # hair⇄hair interior → must NOT be a seam
-            if me.edges[_e2].use_seam:
-                me.edges[_e2].use_seam = False; _gb_strip += 1
-    print(f"[hair-island] FINAL MESH GUARD: closed boundary +{_gb_add}, stripped interior "
-          f"-{_gb_strip}  (hair = clean bounded shells on the shipped seams)")
-except Exception as _ge:
-    import traceback as _gt; _gt.print_exc(); print(f"[hair-island] mesh guard skipped ({_ge!r})")
+if _HAIR_SEAMS:   # RETIRED hair-island FINAL MESH GUARD -- see _HAIR_SEAMS note
+    # ── KAN-8 FINAL MESH GUARD: enforce the hair-island invariant on the FINAL use_seam, AFTER
+    #    the loop + back-fold (both mark edges directly, bypassing all_seam, so they can leave
+    #    hair⇄hair cuts the all_seam pass never sees — the back-fold IS a back-of-hair relief
+    #    cut). The user's rule, guaranteed on what actually ships: (1) EVERY hair⇄skin edge is a
+    #    seam → each natural hair shell is fully bounded / split off from the body / no leak;
+    #    (2) NO hair⇄hair edge is a seam → no internal cut splits a shell (back hair stays one
+    #    clean fillable piece). Nothing is dropped (no side goes missing); body⇄body and the
+    #    skin-side face-chart seams are untouched. This is exactly the state verified on
+    #    last_seams (8 clean leak-free shells, biggest spans both sides).
+    try:
+        _gb_add = 0; _gb_strip = 0
+        for _ei2, _fcs2 in edge_faces.items():
+            if len(_fcs2) != 2:
+                continue
+            _fa2, _fb2 = _fcs2[0], _fcs2[1]
+            _e2 = eidx.get(_edge_key(_ei2))
+            if _e2 is None:
+                continue
+            if is_hair[_fa2] != is_hair[_fb2]:                 # hair⇄skin boundary → must be a seam
+                if not me.edges[_e2].use_seam:
+                    me.edges[_e2].use_seam = True; _gb_add += 1
+            elif is_hair[_fa2] and is_hair[_fb2]:              # hair⇄hair interior → must NOT be a seam
+                if me.edges[_e2].use_seam:
+                    me.edges[_e2].use_seam = False; _gb_strip += 1
+        print(f"[hair-island] FINAL MESH GUARD: closed boundary +{_gb_add}, stripped interior "
+              f"-{_gb_strip}  (hair = clean bounded shells on the shipped seams)")
+    except Exception as _ge:
+        import traceback as _gt; _gt.print_exc(); print(f"[hair-island] mesh guard skipped ({_ge!r})")
 
-# ── UV Unwrap ─────────────────────────────────────────────────────────────────
+# ── CHARTS MUST BE DISKS, AND MUST NOT FOLD ─────────────────────────────────
+# Two failures, one loop, because fixing each one causes the other.
+#
+#   NOT A DISK -> the chart COLLAPSES. A chart with more than one boundary loop cannot be
+#   flattened without unbounded area distortion. Measured: the pelvis+legs chart came out chi=-2
+#   with four boundary loops and its density fell 4.55 -> 0.95 -> 0.043 -> 0.0001 -> 0 going down
+#   the leg, leaving the legs 0.3% of the atlas for 21% of the body's surface.
+#
+#   FOLDED -> the chart OVERWRITES ITSELF. Two pieces of surface land on the same texels and
+#   whichever rasterises last wins. Measured: 2,908 folded faces in the hair, and 334 of the 335
+#   faces painting hair colour onto the SHOULDER were folded hair faces sitting on its texels.
+#
+# Cutting a fold out of the middle of a chart leaves the parent with a HOLE, so it stops being a
+# disk and collapses. Running the disk pass once up front cannot see that, which is exactly how a
+# fold fix drove faces under one texel from 3.00% to 18.20% and starved the hair crown to 4.1
+# texels per face. So alternate the two until both reach zero. Measured on a real bake:
+#     folds cut once, no re-disk : flipped 0   <1texel 20.41%  UVarea 0.4102  crown texels  9.2
+#     interleaved to convergence : flipped 0   <1texel  8.46%  UVarea 0.5485  crown texels 36.1
+# Better than either pass alone on every axis.
 bpy.context.view_layer.objects.active = obj
+
+
+def _gs_charts(_bm):
+    _seen = set(); _out = []
+    for _f in _bm.faces:
+        if _f.index in _seen: continue
+        _st = [_f]; _g = []
+        while _st:
+            _c = _st.pop()
+            if _c.index in _seen: continue
+            _seen.add(_c.index); _g.append(_c.index)
+            for _e in _c.edges:
+                if _e.seam or len(_e.link_faces) != 2: continue
+                for _lf in _e.link_faces:
+                    if _lf.index not in _seen: _st.append(_lf)
+        _out.append(_g)
+    return _out
+
+
+def _gs_bloops(_bm, _g):
+    _gs = set(_g); _ad = defaultdict(set)
+    for _fi in _g:
+        for _e in _bm.faces[_fi].edges:
+            _n = sum(1 for _lf in _e.link_faces if _lf.index in _gs)
+            if _e.seam or len(_e.link_faces) != 2 or _n == 1:
+                _a, _b = _e.verts[0].index, _e.verts[1].index
+                _ad[_a].add(_b); _ad[_b].add(_a)
+    _seen = set(); _L = []
+    for _s in list(_ad):
+        if _s in _seen: continue
+        _st = [_s]; _c2 = []
+        while _st:
+            _c = _st.pop()
+            if _c in _seen: continue
+            _seen.add(_c); _c2.append(_c); _st.extend(_x for _x in _ad[_c] if _x not in _seen)
+        _L.append(_c2)
+    return _L
+
+
+def _gs_diskify(_maxpass=12):
+    """Cut a shortest path between boundary loops until every chart is a topological disk."""
+    _added = 0
+    for _ in range(_maxpass):
+        _bm = bmesh.new(); _bm.from_mesh(me)
+        _bm.faces.ensure_lookup_table(); _bm.edges.ensure_lookup_table(); _bm.verts.ensure_lookup_table()
+        _todo = [(_g, _L) for _g in _gs_charts(_bm) if len(_g) > 20
+                 for _L in (_gs_bloops(_bm, _g),) if len(_L) > 1]
+        if not _todo:
+            _bm.free(); break
+        _new = []
+        for _g, _L in _todo:
+            _vin = set()
+            for _fi in _g:
+                for _v in _bm.faces[_fi].verts: _vin.add(_v.index)
+            _L = sorted(_L, key=len, reverse=True)
+            _src = set(_L[0]); _tgt = set().union(*[set(_x) for _x in _L[1:]])
+            _dist = {_v: 0.0 for _v in _src}; _prev = {}
+            _pq = [(0.0, _v) for _v in _src]; heapq.heapify(_pq); _hit = None
+            while _pq:
+                _d, _v = heapq.heappop(_pq)
+                if _d > _dist.get(_v, 1e18) + 1e-12: continue
+                if _v in _tgt: _hit = _v; break
+                for _e in _bm.verts[_v].link_edges:
+                    if _e.seam: continue
+                    _w = _e.other_vert(_bm.verts[_v]).index
+                    if _w not in _vin: continue
+                    _nd = _d + _e.calc_length()
+                    if _nd < _dist.get(_w, 1e18):
+                        _dist[_w] = _nd; _prev[_w] = _v; heapq.heappush(_pq, (_nd, _w))
+            if _hit is None: continue
+            _cur = _hit
+            while _cur in _prev:
+                _p = _prev[_cur]
+                _e = next((_x for _x in _bm.verts[_cur].link_edges
+                           if _x.other_vert(_bm.verts[_cur]).index == _p), None)
+                if _e is not None and not _e.seam:
+                    _e.seam = True; _new.append(_e.index)
+                _cur = _p
+        _bm.free()
+        for _ei in _new:
+            me.edges[_ei].use_seam = True
+        _added += len(_new)
+        if not _new:
+            break
+    return _added
+
+
+def _gs_unwrap():
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    # MINIMUM_STRETCH (SLIM), not ANGLE_BASED. ABF is conformal: it preserves angles and pays for
+    # it in area, so along a limb the area decays exponentially. It also folds far more often.
+    bpy.ops.uv.unwrap(method='MINIMUM_STRETCH', margin=0.004)
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+
+def _gs_flipped():
+    """A folded face has its UV winding inverted relative to its own chart -- objective, no tuning."""
+    _u = me.uv_layers.active
+    if not _u:
+        return np.zeros(len(me.polygons), bool)
+    _n = len(me.loops); _b = np.empty(_n * 2); _u.data.foreach_get('uv', _b); _UV = _b.reshape(_n, 2)
+    _s = np.zeros(len(me.polygons))
+    for _i, _p in enumerate(me.polygons):
+        _P = _UV[list(_p.loop_indices)]; _a = 0.0
+        for _k in range(1, len(_P) - 1):
+            _A, _B, _C = _P[0], _P[_k], _P[_k + 1]
+            _a += 0.5 * ((_B[0] - _A[0]) * (_C[1] - _A[1]) - (_C[0] - _A[0]) * (_B[1] - _A[1]))
+        _s[_i] = _a
+    _nz = _s[_s != 0]
+    _maj = np.sign(np.median(_nz)) if len(_nz) else 1.0
+    return (np.sign(_s) != _maj) & (_s != 0)
+
+
+try:
+    for _it in range(6):
+        _nd = _gs_diskify()
+        _gs_unwrap()
+        _fl = _gs_flipped()
+        _nf = int(_fl.sum())
+        print(f"[uv-charts] iter {_it + 1}: disk cuts {_nd}, folded faces after unwrap {_nf}")
+        if _nf == 0:
+            break
+        _bmc = bmesh.new(); _bmc.from_mesh(me)
+        _bmc.edges.ensure_lookup_table(); _bmc.faces.ensure_lookup_table()
+        _cut = 0
+        for _e in _bmc.edges:
+            _lf = _e.link_faces
+            if len(_lf) == 2 and (_fl[_lf[0].index] != _fl[_lf[1].index]) and not _e.seam:
+                _e.seam = True; _cut += 1
+        _bmc.to_mesh(me); _bmc.free()
+        print(f"[uv-charts]   cut {_cut} edge(s) around the folds")
+        if _cut == 0:
+            break
+    print(f"[uv-charts] done: {int(_gs_flipped().sum())} folded face(s) remain")
+except Exception as _ce:
+    import traceback as _ct
+    _ct.print_exc()
+    print(f"[uv-charts] FAILED ({_ce!r}) - falling back to a single plain unwrap")
+    try:
+        _gs_unwrap()
+    except Exception:
+        pass
+
+# ── Rescale ONLY the outlier UV islands ──────────────────────────────────────────
+# unwrap() normalises every chart independently, so a chart holding one or two triangles
+# comes out unit-sized; pack_islands then preserves relative island scale, so those stray
+# charts claimed ~44% of the atlas and crushed everyone else's texel density.
+# Deliberately NOT average_islands_scale(): that equalises ALL islands, which strips the
+# face chart of the extra density the unwrap gives it (small area, needs the most texels)
+# and visibly degrades the face. Only islands whose UV/3D area ratio sits far outside the
+# family are brought back into it; every other island keeps exactly the density it had.
+try:
+    _uvl = me.uv_layers.active
+    _bmi = bmesh.new(); _bmi.from_mesh(me)
+    _bmi.faces.ensure_lookup_table(); _bmi.edges.ensure_lookup_table()
+    _uli = _bmi.loops.layers.uv.active
+    _adj = {f.index: set() for f in _bmi.faces}
+    for _e in _bmi.edges:
+        if len(_e.link_faces) == 2:
+            _fa, _fb = _e.link_faces
+            _vs = {_e.verts[0].index, _e.verts[1].index}
+            _ua = {lp.vert.index: tuple(lp[_uli].uv) for lp in _fa.loops if lp.vert.index in _vs}
+            _ub = {lp.vert.index: tuple(lp[_uli].uv) for lp in _fb.loops if lp.vert.index in _vs}
+            if all(abs(_ua[_v][0] - _ub[_v][0]) < 1e-5 and abs(_ua[_v][1] - _ub[_v][1]) < 1e-5
+                   for _v in _vs if _v in _ua and _v in _ub):
+                _adj[_fa.index].add(_fb.index); _adj[_fb.index].add(_fa.index)
+    _bmi.free()
+    _seen = set(); _isl = []
+    for _fi in range(len(me.polygons)):
+        if _fi in _seen: continue
+        _st = [_fi]; _grp = []
+        while _st:
+            _c = _st.pop()
+            if _c in _seen: continue
+            _seen.add(_c); _grp.append(_c); _st.extend(_adj[_c] - _seen)
+        _isl.append(_grp)
+
+    def _uva(_fi):
+        _L = list(me.polygons[_fi].loop_indices)
+        _P = [_uvl.data[_i].uv for _i in _L]; _s = 0.0
+        for _k in range(1, len(_P) - 1):
+            _a, _b, _c = _P[0], _P[_k], _P[_k + 1]
+            _s += 0.5 * abs((_b[0]-_a[0])*(_c[1]-_a[1]) - (_c[0]-_a[0])*(_b[1]-_a[1]))
+        return _s
+
+    _rat = []
+    for _g in _isl:
+        _u = sum(_uva(_f) for _f in _g)
+        _t = sum(me.polygons[_f].area for _f in _g)
+        _rat.append(_u / _t if _t > 1e-12 else 0.0)
+    _ok = [_r for _r in _rat if _r > 0]
+    _med = float(np.median(_ok)) if _ok else 0.0
+    _fixed = 0; _worst = max(_rat) if _rat else 0.0
+    if _med > 0:
+        for _gi, _g in enumerate(_isl):
+            if _rat[_gi] > 50.0 * _med:
+                _sc = (_med / _rat[_gi]) ** 0.5
+                _ids = [_i for _f in _g for _i in me.polygons[_f].loop_indices]
+                _cu = sum(_uvl.data[_i].uv[0] for _i in _ids) / len(_ids)
+                _cv = sum(_uvl.data[_i].uv[1] for _i in _ids) / len(_ids)
+                for _i in _ids:
+                    _p = _uvl.data[_i].uv
+                    _uvl.data[_i].uv = (_cu + (_p[0]-_cu)*_sc, _cv + (_p[1]-_cv)*_sc)
+                _fixed += 1
+    print(f"[uv-scale] islands={len(_isl)}  median UV/3D ratio={_med:.4f}  "
+          f"worst={_worst:.1f} ({_worst/max(_med,1e-9):.0f}x) -> rescaled {_fixed} outlier "
+          f"island(s); all other islands keep their own density")
+except Exception as _se:
+    import traceback as _tb; _tb.print_exc()
+    print(f"[uv-scale] outlier rescale skipped ({_se!r})")
+
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.004)
 try:
     bpy.ops.uv.pack_islands(margin=0.002)
     print("UV islands packed")
@@ -1537,6 +1818,78 @@ if uv_layer:
         for i, ud in enumerate(uv_layer.data):
             ud.uv = ((raw[i, 0] - u_min) * scale, (raw[i, 1] - v_min) * scale)
         print("UV normalized")
+# ── TRIPWIRE: no single face may own a meaningful share of the atlas ──────────
+# A 175k-face body has a median face UV area of ~2e-7. A face at 1% of the sheet means
+# island scales are broken and every other face is being packed into the remainder.
+_uv_tripwire_fail = None
+try:
+    _uvl = me.uv_layers.active
+    if _uvl:
+        _uv = np.array([list(_d.uv) for _d in _uvl.data], dtype=np.float64)
+        _n = len(me.polygons)
+        _a2 = np.zeros(_n); _a3 = np.zeros(_n)
+        for _p in me.polygons:
+            _L = list(_p.loop_indices); _P = _uv[_L]; _s = 0.0
+            for _i in range(1, len(_L) - 1):
+                _o, _b, _c = _P[0], _P[_i], _P[_i + 1]
+                _s += 0.5 * abs((_b[0]-_o[0])*(_c[1]-_o[1]) - (_c[0]-_o[0])*(_b[1]-_o[1]))
+            _a2[_p.index] = _s; _a3[_p.index] = _p.area
+        _r = _a2 / np.maximum(_a3, 1e-30)
+        _med = float(np.median(_r[_a3 > 1e-12]))
+        _mask = _r > 50.0 * _med
+        print(f"[uv-scale] largest single face = {100*_a2.max():.3f}% of atlas "
+              f"(face {int(_a2.argmax())}); median UV/3D ratio {_med:.4f}; "
+              f"faces >50x median: {int(_mask.sum())} ({100*_a2[_mask].sum():.1f}% of atlas)")
+        if _a2.max() > 0.01:
+            _uv_tripwire_fail = (
+                "one face owns {:.2f}% of the atlas (face {}); {} faces exceed 50x the median "
+                "UV/3D ratio and cover {:.1f}% of it".format(
+                    100 * _a2.max(), int(_a2.argmax()), int(_mask.sum()), 100 * _a2[_mask].sum()))
+            print("*** UV TRIPWIRE: one face owns >1% of the atlas -- island scales are broken "
+                  "and body texel density is being crushed. Do not ship this bake. ***")
+
+        # ── STARVATION half of the tripwire ──────────────────────────────────────
+        # The check above only sees islands that are too BIG. It is structurally blind to the
+        # opposite failure, and that is how the legs shipped for months holding 0.3% of the atlas
+        # for 21% of the body's surface (83% of leg faces under one texel), which read as blotches
+        # and stray specks smeared over a whole thigh. A region's share of the ATLAS should match
+        # its share of the SURFACE; that is a ratio, so there is nothing to tune. Anything under a
+        # quarter of its fair share cannot hold recognisable texture.
+        _ctr = np.array([list(_p.center) for _p in me.polygons], dtype=np.float64)
+        _ax = int(np.argmax(_ctr.max(0) - _ctr.min(0)))          # the standing figure's height axis
+        _h = _ctr[:, _ax]; _hi = _h.max(); _span = _hi - _h.min()
+        _tot2 = max(_a2.sum(), 1e-30); _tot3 = max(_a3.sum(), 1e-30)
+        _bands = (("top    (head/hair)", _h > _hi - 0.25 * _span),
+                  ("upper  (torso)", (_h <= _hi - 0.25 * _span) & (_h > _hi - 0.55 * _span)),
+                  ("lower  (legs)", (_h <= _hi - 0.55 * _span) & (_h > _hi - 0.90 * _span)),
+                  ("bottom (feet)", _h <= _hi - 0.90 * _span))
+        _starved = []
+        for _nm, _bm2 in _bands:
+            if _bm2.sum() < 50: continue
+            _fu = _a2[_bm2].sum() / _tot2; _f3 = _a3[_bm2].sum() / _tot3
+            _ratio = _fu / max(_f3, 1e-12)
+            print(f"[uv-fair] {_nm:20s} {100*_fu:5.1f}% of atlas / {100*_f3:5.1f}% of surface "
+                  f"-> {_ratio:.2f}x fair share")
+            if _f3 > 0.05 and _ratio < 0.25:
+                _starved.append(f"{_nm.strip()} holds {100*_fu:.1f}% of the atlas for "
+                                f"{100*_f3:.1f}% of the surface ({_ratio:.2f}x fair share)")
+        _under = float((_a2 * 4096 * 4096 < 1.0).mean())
+        print(f"[uv-fair] faces with less than one texel at 4096: {100*_under:.2f}%")
+        if _starved:
+            _uv_tripwire_fail = "; ".join(_starved)
+            print("*** UV TRIPWIRE: a body region is starved of atlas area -- it cannot hold "
+                  "texture at any resolution. Do not ship this bake. ***")
+except Exception as _te:
+    print(f"[uv-scale] tripwire skipped: {_te!r}")
+
+# ABORT rather than warn. This check has been printing "Do not ship this bake" while the pipeline
+# carried on for several more minutes and produced exactly the unusable asset it was describing.
+# Broken island scales crush body texel density and nothing downstream recovers it.
+if _uv_tripwire_fail and os.environ.get("GS_UV_TRIPWIRE_ABORT", "1").strip() != "0":
+    raise RuntimeError(
+        "[gen_seams] ABORTING BAKE - UV island scales are broken: " + _uv_tripwire_fail +
+        ". Stopped before genital texturing, GLB export and projection. "
+        "Set GS_UV_TRIPWIRE_ABORT=0 to continue anyway.")
 print("UV unwrap done")
 
 # ── Island count ──────────────────────────────────────────────────────────────

@@ -1,8 +1,8 @@
 {
   "id": "trellis2-qwen-mv",
   "revision": 0,
-  "last_node_id": 148,
-  "last_link_id": 291,
+  "last_node_id": 150,
+  "last_link_id": 293,
   "nodes": [
     {
       "id": 2,
@@ -802,7 +802,9 @@
           "name": "fbx_output_path",
           "type": "STRING",
           "slot_index": 0,
-          "links": []
+          "links": [
+            292
+          ]
         }
       ],
       "properties": {
@@ -815,7 +817,8 @@
         false,
         "",
         "C:/Unreal Projects/C++/RPG_Unreal 5.5",
-        "/Game/Assets/OwnAssets/ComfyUI"
+        "/Game/Assets/OwnAssets/ComfyUI",
+        false
       ]
     },
     {
@@ -5807,6 +5810,102 @@
         "character_posed_00003_.png",
         "image"
       ]
+    },
+    {
+      "id": 149,
+      "type": "CharacterStrandHair",
+      "pos": [
+        3964.6344046118284,
+        -137.3196681675613
+      ],
+      "size": [
+        360,
+        200
+      ],
+      "flags": {},
+      "order": 71,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "fbx_path",
+          "name": "fbx_path",
+          "type": "STRING",
+          "link": 292
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "fbx_output_path",
+          "name": "fbx_output_path",
+          "type": "STRING",
+          "links": [
+            293
+          ]
+        },
+        {
+          "localized_name": "review_sheet",
+          "name": "review_sheet",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CharacterStrandHair"
+      },
+      "widgets_values": [
+        true,
+        200.0,
+        "C:/Unreal Projects/C++/RPG_Unreal 5.5",
+        "/Game/Assets/OwnAssets/ComfyUI",
+        true,
+        false
+      ]
+    },
+    {
+      "id": 150,
+      "type": "CharacterFace",
+      "pos": [
+        4384.634404611828,
+        -137.3196681675613
+      ],
+      "size": [
+        360,
+        160
+      ],
+      "flags": {},
+      "order": 72,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "fbx_path",
+          "name": "fbx_path",
+          "type": "STRING",
+          "link": 293
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "face_fbx",
+          "name": "face_fbx",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "localized_name": "review_blend",
+          "name": "review_blend",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CharacterFace"
+      },
+      "widgets_values": [
+        true,
+        "C:/Unreal Projects/C++/RPG_Unreal 5.5",
+        "/Game/Assets/OwnAssets/ComfyUI",
+        true
+      ]
     }
   ],
   "links": [
@@ -6736,6 +6835,22 @@
       1,
       52,
       6,
+      "STRING"
+    ],
+    [
+      292,
+      52,
+      0,
+      149,
+      0,
+      "STRING"
+    ],
+    [
+      293,
+      149,
+      0,
+      150,
+      0,
       "STRING"
     ]
   ],
